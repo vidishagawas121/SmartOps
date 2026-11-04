@@ -45,10 +45,18 @@ const DS = {
   radiusBtn:      '12px',
 };
 
-// ── Portal options ─────────────────────────────────────────────────────────────
-const PORTALS: { role: UserRole; label: string; Icon: React.FC<{ size?: number; strokeWidth?: number }> }[] = [
-  { role: 'Owner',  label: 'Owner',  Icon: KeyRound },
-  { role: 'Driver', label: 'Driver', Icon: Truck },
+// ── 4 Unified Operational Portals ─────────────────────────────────────────────
+const PORTALS: {
+  role: UserRole;
+  label: string;
+  badge: string;
+  Icon: React.FC<{ size?: number; strokeWidth?: number }>;
+  demoEmail: string;
+}[] = [
+  { role: 'Owner',      label: 'Owner',      badge: 'Executive', Icon: KeyRound, demoEmail: 'owner@smartops.com' },
+  { role: 'Supervisor', label: 'Supervisor', badge: 'Factory',   Icon: Factory,  demoEmail: 'supervisor@smartops.com' },
+  { role: 'Driver',     label: 'Driver',     badge: 'Logistics', Icon: Truck,    demoEmail: 'driver@smartops.com' },
+  { role: 'Worker',     label: 'Worker',     badge: 'Shopfloor', Icon: HardHat,  demoEmail: 'worker@smartops.com' },
 ];
 
 // ── Features (3 bullets only) ─────────────────────────────────────────────────
@@ -82,6 +90,12 @@ export const Login: React.FC = () => {
 
   const handleRoleSelect = (role: UserRole) => {
     setSelectedRole(role);
+    setErrorMsg('');
+    const target = PORTALS.find(p => p.role === role);
+    if (target && (!email || PORTALS.some(p => p.demoEmail === email))) {
+      setEmail(target.demoEmail);
+      if (!password) setPassword('password123');
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -89,11 +103,12 @@ export const Login: React.FC = () => {
     setErrorMsg('');
     setLoading(true);
     try {
-      await login(email, selectedRole, password);
+      const loggedInUser: any = await login(email, selectedRole, password);
       setLoading(false);
-      if (selectedRole === 'Driver') navigate('/driver');
-      else if (selectedRole === 'Supervisor') navigate('/supervisor');
-      else if (selectedRole === 'Worker') navigate('/worker');
+      const userRole = (loggedInUser?.role || selectedRole).toLowerCase();
+      if (userRole === 'driver') navigate('/driver');
+      else if (userRole === 'supervisor') navigate('/supervisor');
+      else if (userRole === 'worker') navigate('/worker');
       else navigate('/owner');
     } catch (err: any) {
       setLoading(false);
@@ -471,18 +486,23 @@ export const Login: React.FC = () => {
                 </label>
               </div>
 
-              {/* Portal selector — segmented tabs matching dashboard tab style */}
+              {/* Portal selector — 4 Unified Operational Dashboards */}
               <div>
-                <label style={labelStyle}>Portal</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>Operational Portal</label>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: DS.primary }}>
+                    4 Connected Dashboards
+                  </span>
+                </div>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: '1fr 1fr 1fr',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
                   background: DS.surfaceLow,
                   borderRadius: DS.radiusInput,
                   border: `1px solid ${DS.border}`,
                   padding: 3,
-                  gap: 2,
-                  height: 48,
+                  gap: 3,
+                  minHeight: 46,
                 }}>
                   {PORTALS.map(({ role, label, Icon }) => {
                     const active = selectedRole === role;
@@ -499,33 +519,79 @@ export const Login: React.FC = () => {
                           background: active ? DS.card : 'transparent',
                           color: active ? DS.primary : DS.textMuted,
                           fontWeight: active ? 700 : 500,
-                          fontSize: 13,
+                          fontSize: 12,
                           fontFamily: 'inherit',
                           boxShadow: active ? DS.shadowSm : 'none',
                           transition: 'all 200ms ease',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 4,
+                          padding: '8px 2px',
                         }}
                       >
                         <Icon size={13} strokeWidth={2.1} />
-                        {label}
+                        <span>{label}</span>
                       </button>
                     );
                   })}
-                  {/* Manager — greyed out, coming soon */}
-                  <button
-                    type="button"
-                    id="portal-manager"
-                    disabled
-                    style={{
-                      borderRadius: 9, border: 'none', cursor: 'not-allowed',
-                      background: 'transparent',
-                      color: DS.textDisabled,
-                      fontWeight: 500, fontSize: 13, fontFamily: 'inherit',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
-                    }}
-                  >
-                    Manager
-                  </button>
+                </div>
+              </div>
+
+              {/* Quick 1-Click Demo Login Bar */}
+              <div style={{
+                padding: '10px 12px',
+                background: DS.surfaceLow,
+                borderRadius: DS.radiusInput,
+                border: `1px solid ${DS.border}`,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: DS.textSecondary, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                    ⚡ 1-Click Demo Access
+                  </span>
+                  <span style={{ fontSize: 10, color: DS.textMuted, fontWeight: 500 }}>
+                    Auto-fills role & password
+                  </span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+                  {PORTALS.map(({ role, label, Icon, demoEmail }) => {
+                    const isSelected = selectedRole === role;
+                    return (
+                      <button
+                        key={`demo-${role}`}
+                        type="button"
+                        id={`demo-fill-${role.toLowerCase()}`}
+                        onClick={() => {
+                          setSelectedRole(role);
+                          setEmail(demoEmail);
+                          setPassword('password123');
+                          setErrorMsg('');
+                        }}
+                        style={{
+                          padding: '6px 4px',
+                          background: isSelected ? DS.card : 'rgba(255,255,255,0.7)',
+                          border: `1px solid ${isSelected ? DS.primary : DS.border}`,
+                          borderRadius: 8,
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: isSelected ? DS.primary : DS.textSecondary,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 3,
+                          transition: 'all 150ms ease',
+                        }}
+                        title={`Fill ${role} credentials (${demoEmail})`}
+                      >
+                        <Icon size={11} strokeWidth={2} />
+                        <span>{label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

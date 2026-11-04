@@ -307,17 +307,6 @@ export const OperationsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const login = async (email: string, role: UserRole, password?: string) => {
     const res = await api.auth.login(email, role, password);
-    if (res.user && role && res.user.role.toLowerCase() !== role.toLowerCase()) {
-      const expectedPortal = res.user.role;
-      throw {
-        response: {
-          status: 403,
-          data: {
-            message: `Access denied. This account is registered as ${res.user.role}. Please select the ${expectedPortal} portal to sign in.`
-          }
-        }
-      };
-    }
     setUser(res.user);
     localStorage.setItem('smartops_user', JSON.stringify(res.user)); if (res.token) { localStorage.setItem('smartops_jwt', res.token); localStorage.setItem('smartops_token', res.token); }
     triggerNotification('System Alert', 'Session Initialized', `Welcome back ${res.user.fullName}! JWT validated.`, 'Info');
