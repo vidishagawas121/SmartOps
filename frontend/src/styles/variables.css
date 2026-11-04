@@ -1,0 +1,153 @@
+/* ================================================================
+   SmartOps Enterprise Design System — CSS Custom Properties
+   Palette: Material 3 inspired, enterprise-grade SaaS tokens
+   ================================================================ */
+
+:root {
+  color-scheme: light dark;
+  /* ── Surfaces ── */
+  --color-bg: #FFFFFF;
+  --color-card: #FFFFFF;
+  --color-sidebar: #FFFFFF;
+  --color-navbar: #FFFFFF;
+  --color-surface-container: #F3F4F6;
+  --color-surface-low: #F9FAFB;
+  --color-surface-lowest: #FFFFFF;
+  --color-surface-highest: #E5E7EB;
+  --color-surface-dim: #F3F4F6;
+  --color-surface-variant: #F3F4F6;
+
+  /* ── Primary ── */
+  --color-primary: #006A6A;
+  --color-primary-container: #00A3A3;
+  --color-primary-fixed: #7DF5F5;
+  --color-primary-fixed-dim: #5DD9D8;
+  --color-on-primary-container: #003131;
+
+  /* ── Secondary ── */
+  --color-secondary: #4B5563;
+  --color-secondary-container: #E5E7EB;
+  --color-secondary-fixed-dim: #9CA3AF;
+
+  /* ── Tertiary ── */
+  --color-tertiary: #00687A;
+  --color-tertiary-container: #00A0BB;
+
+  /* ── Text ── */
+  --color-text-primary: #0B1C30;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748B;
+  --color-text-disabled: #9CA3AF;
+
+  /* ── Modal & Dialog Tokens ── */
+  --color-modal-bg: #FFFFFF;
+  --color-text-heading: #0B1C30;
+  --color-text-body: #334155;
+  --color-text-subtle: #64748B;
+  --color-text-warning: #92400E;
+  --color-bg-warning: #FEF3C7;
+  --color-border-warning: #FDE68A;
+  --color-text-danger: #B91C1C;
+
+  /* ── Outline & Borders ── */
+  --color-outline: #6B7280;
+  --color-outline-variant: #D1D5DB;
+  --color-border: #E5E7EB;
+
+  /* ── Semantic Status ── */
+  --color-success: #10B981;
+  --color-success-container: #DCFCE7;
+
+  --color-warning: #F59E0B;
+  --color-warning-container: #FEF3C7;
+
+  --color-info: #0284C7;
+  --color-info-container: #E0F2FE;
+
+  --color-danger: #BA1A1A;
+  --color-danger-container: #FFDAD4;
+
+  /* ── Chart palette ── */
+  --color-revenue: #10B981;
+  --color-inventory: #006A6A;
+  --color-fleet: #0284C7;
+  --color-attendance: #8B5CF6;
+  --color-salary: #F59E0B;
+  --color-notifications: #BA1A1A;
+}
+
+/* ================================================================
+   DARK MODE
+   ================================================================ */
+.dark {
+  color-scheme: dark;
+  /* ── Surfaces ── */
+  --color-bg: #0F172A;
+  --color-card: #1E293B;
+  --color-sidebar: #111827;
+  --color-navbar: #111827;
+  --color-surface-container: #1E293B;
+  --color-surface-low: #111827;
+  --color-surface-lowest: #0F172A;
+  --color-surface-highest: #334155;
+  --color-surface-dim: #1E293B;
+  --color-surface-variant: #334155;
+
+  /* ── Primary ── */
+  --color-primary: #7DF5F5;
+  --color-primary-container: #006A6A;
+  --color-primary-fixed: #7DF5F5;
+  --color-primary-fixed-dim: #5DD9D8;
+  --color-on-primary-container: #003131;
+
+  /* ── Secondary ── */
+  --color-secondary: #BCC7DE;
+  --color-secondary-container: #3B4758;
+  --color-secondary-fixed-dim: #545F73;
+
+  /* ── Tertiary ── */
+  --color-tertiary: #00A0BB;
+  --color-tertiary-container: #00687A;
+
+  /* ── Text ── */
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #CBD5E1;
+  --color-text-muted: #94A3B8;
+  --color-text-disabled: #64748B;
+
+  /* ── Modal & Dialog Tokens ── */
+  --color-modal-bg: #111827;
+  --color-text-heading: #F8FAFC;
+  --color-text-body: #CBD5E1;
+  --color-text-subtle: #94A3B8;
+  --color-text-warning: #FCD34D;
+  --color-bg-warning: rgba(120, 53, 15, 0.4);
+  --color-border-warning: rgba(245, 158, 11, 0.3);
+  --color-text-danger: #FCA5A5;
+
+  /* ── Outline & Borders ── */
+  --color-outline: #94A3B8;
+  --color-outline-variant: #475569;
+  --color-border: #334155;
+
+  /* ── Semantic Status ── */
+  --color-success: #34D399;
+  --color-success-container: #064E3B;
+
+  --color-warning: #FBBF24;
+  --color-warning-container: #78350F;
+
+  --color-info: #38BDF8;
+  --color-info-container: #0369A1;
+
+  --color-danger: #FCA5A5;
+  --color-danger-container: #7F1D1D;
+
+  /* ── Chart palette ── */
+  --color-revenue: #34D399;
+  --color-inventory: #7DF5F5;
+  --color-fleet: #38BDF8;
+  --color-attendance: #A78BFA;
+  --color-salary: #FBBF24;
+  --color-notifications: #FCA5A5;
+}

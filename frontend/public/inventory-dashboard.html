@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="only light">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartOps - Inventory Dashboard</title>
+  <!-- Outfit Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons via CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    /* CSS Variables for Palette */
+    :root {
+      color-scheme: light dark;
+      /* Colors */
+      --primary: #006a6a;
+      --primary-container: #00a3a3;
+      --primary-fixed: #7df5f5;
+      --primary-fixed-dim: #5dd9d8;
+      --on-primary-container: #003131;
+
+      --secondary: #545f73;
+      --secondary-container: #d5e0f8;
+      --secondary-fixed-dim: #bcc7de;
+
+      --tertiary: #00687a;
+      --tertiary-container: #00a0bb;
+
+      --background: #f8f9ff;
+      --surface: #ffffff;
+      --surface-container: #e5eeff;
+      --surface-dim: #cbdbf5;
+      --surface-variant: #d3e4fe;
+      --surface-low: #eff4ff;
+      --surface-lowest: #ffffff;
+
+      --text-primary: #0b1c30;
+      --text-secondary: #545f73;
+      --outline: #6d7a79;
+      --outline-variant: #bcc9c8;
+
+      --error: #ba1a1a;
+      --error-container: #ffdad6;
+
+      /* Spacing & Borders */
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --primary: #7df5f5;
+      --primary-container: #00a3a3;
+      --primary-fixed: #7df5f5;
+      --primary-fixed-dim: #5dd9d8;
+      --on-primary-container: #f8f9ff;
+
+      --secondary: #bcc7de;
+      --secondary-container: #545f73;
+      --secondary-fixed-dim: #bcc7de;
+
+      --tertiary: #00a0bb;
+      --tertiary-container: #00687a;
+
+      --background: #0b1c30;
+      --surface: #003131; /* Card backgrounds in dark mode */
+      --surface-container: #002121;
+      --surface-dim: #001b1b;
+      --surface-variant: #004141;
+      --surface-low: #002828;
+      --surface-lowest: #003131;
+
+      --text-primary: #f8f9ff;
+      --text-secondary: #bcc7de;
+      --outline: #bcc9c8;
+      --outline-variant: #6d7a79;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--background);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+      transition: var(--transition);
+    }
+
+    /* --- SIDEBAR --- */
+    .sidebar {
+      width: 260px;
+      background-color: #0F172A;
+      border-right: 1px solid #1E293B;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 100;
+      transition: var(--transition);
+      padding: 24px;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #00a3a3, #006a6a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(0, 163, 163, 0.2);
+    }
+
+    .logo-text {
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: -0.5px;
+      color: #F8FAFC;
+    }
+
+    .logo-accent {
+      color: #7DF5F5;
+    }
+
+    .menu-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .menu-item a {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 16px;
+      color: #CBD5E1;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+      border-radius: 12px;
+      transition: all 200ms ease;
+    }
+
+    .menu-item a i {
+      color: #CBD5E1;
+      transition: color 200ms ease;
+    }
+
+    .menu-item.active a {
+      background-color: #14B8A6;
+      color: #FFFFFF;
+    }
+
+    .menu-item.active a i {
+      color: #FFFFFF;
+    }
+
+    .menu-item a:hover:not(.active a) {
+      background-color: rgba(20, 184, 166, 0.12);
+      color: #FFFFFF;
+      transform: translateX(4px);
+    }
+
+    .menu-item a:hover:not(.active a) i {
+      color: #14B8A6;
+    }
+
+    .sidebar-footer {
+      border-top: 1px solid #1E293B;
+      padding-top: 24px;
+    }
+
+    /* --- TOP HEADER --- */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 260px;
+      right: 0;
+      height: 80px;
+      background-color: var(--surface);
+      border-bottom: 1px solid var(--outline-variant);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      z-index: 90;
+      transition: var(--transition);
+    }
+
+    .header-title h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-primary);
+    }
+
+    .search-bar {
+      position: relative;
+      width: 320px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      height: 44px;
+      background-color: var(--background);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--radius-md);
+      padding: 0 16px 0 44px;
+      font-size: 14px;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .search-bar input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background-color: var(--surface);
+      box-shadow: 0 0 0 4px rgba(0, 163, 163, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      width: 18px;
+      height: 18px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .action-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--outline-variant);
+      background-color: var(--surface);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .action-btn:hover {
+      background-color: var(--surface-low);
+      transform: translateY(-1px);
+    }
+
+    .btn-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      background-color: var(--error);
+      border-radius: 50%;
+    }
+
+    .profile-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--outline-variant);
+      overflow: hidden;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-avatar:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(11, 28, 48, 0.08);
+    }
+
+    /* --- MAIN CONTENT AREA --- */
+    .main-wrapper {
+      margin-left: 260px;
+      margin-top: 80px;
+      padding: 40px;
+      flex: 1;
+      min-height: calc(100vh - 80px);
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* STAT CARDS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+    }
+
+    .stat-card {
+      background-color: var(--surface);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 140px;
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(11, 28, 48, 0.04);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-secondary);
+    }
+
+    .stat-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-teal {
+      background-color: var(--surface-low);
+      color: var(--primary);
+    }
+
+    .icon-blue {
+      background-color: var(--secondary-container);
+      color: var(--tertiary);
+    }
+
+    .icon-red {
+      background-color: var(--error-container);
+      color: var(--error);
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-primary);
+      margin-top: 12px;
+    }
+
+    .stat-footer {
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: auto;
+      color: var(--text-secondary);
+    }
+
+    .trend-up {
+      color: var(--primary);
+    }
+
+    .trend-down {
+      color: var(--error);
+    }
+
+    /* ROW 2 LAYOUT */
+    .dashboard-row-2 {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 32px;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-row-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dashboard-panel {
+      background-color: var(--surface);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      transition: var(--transition);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
+    }
+
+    .panel-action-btn {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      background-color: var(--primary);
+      border: none;
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    /* BUTTON HOVER GLOW REQUIREMENT */
+    .panel-action-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px 0 rgba(125, 245, 245, 0.3);
+      filter: brightness(1.1);
+    }
+
+    /* --- CHART PLACEHOLDER --- */
+    .chart-container {
+      flex: 1;
+      min-height: 320px;
+      display: flex;
+      align-items: flex-end;
+      gap: 20px;
+      padding-top: 24px;
+      position: relative;
+    }
+
+    .chart-y-axis {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: calc(100% - 32px);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding-right: 12px;
+      border-right: 1px solid var(--outline-variant);
+      width: 45px;
+    }
+
+    .chart-bars-wrap {
+      flex: 1;
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      height: 100%;
+      position: relative;
+    }
+
+    .chart-bar-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      max-width: 48px;
+    }
+
+    .chart-bar-pillar {
+      width: 100%;
+      border-radius: 6px 6px 0 0;
+      background: linear-gradient(to top, var(--primary), var(--primary-container));
+      cursor: pointer;
+      position: relative;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(0, 106, 106, 0.1);
+    }
+
+    .chart-bar-pillar:hover {
+      background: linear-gradient(to top, var(--primary-fixed), var(--primary-container));
+      transform: scaleY(1.02);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .chart-bar-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+
+    /* TOOLTIP */
+    .chart-bar-pillar::after {
+      content: attr(data-value);
+      position: absolute;
+      top: -36px;
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      background-color: var(--text-primary);
+      color: var(--background);
+      padding: 6px 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      opacity: 0;
+      pointer-events: none;
+      transition: var(--transition);
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(11, 28, 48, 0.15);
+    }
+
+    .chart-bar-pillar:hover::after {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* --- INVENTORY HEALTH --- */
+    .health-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .health-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .health-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .health-label {
+      color: var(--text-secondary);
+    }
+
+    .health-bar-bg {
+      height: 8px;
+      background-color: var(--surface-low);
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid var(--outline-variant);
+    }
+
+    .health-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background-color: var(--primary);
+      transition: var(--transition);
+    }
+
+    .health-bar-fill.teal {
+      background-color: var(--primary);
+    }
+
+    .health-bar-fill.blue {
+      background-color: var(--tertiary);
+    }
+
+    .health-bar-fill.orange {
+      background-color: var(--primary-fixed-dim);
+    }
+
+    /* OVERALL HEALTH STATUS */
+    .overall-status-box {
+      border-top: 1px solid var(--outline-variant);
+      padding-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      text-align: center;
+      margin-top: auto;
+    }
+
+    .overall-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .overall-badge {
+      display: inline-block;
+      align-self: center;
+      padding: 10px 24px;
+      background-color: var(--surface-low);
+      color: var(--primary);
+      font-size: 18px;
+      font-weight: 800;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--outline-variant);
+      letter-spacing: 0.5px;
+      transition: var(--transition);
+    }
+
+    [data-theme="dark"] .overall-badge {
+      background-color: var(--primary-container);
+      color: var(--on-primary-container);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo-container">
+      <div class="logo-icon">
+        <i data-lucide="package-open"></i>
+      </div>
+      <div class="logo-text">Smart<span class="logo-accent">Ops</span></div>
+    </div>
+    
+    <nav style="flex: 1;">
+      <ul class="menu-list">
+        <li class="menu-item active">
+          <a href="#">
+            <i data-lucide="layout-dashboard"></i>
+            Dashboard
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="#">
+            <i data-lucide="list-collapse"></i>
+            Inventory List
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="#">
+            <i data-lucide="check-square"></i>
+            Tasks
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="#">
+            <i data-lucide="users-round"></i>
+            Attendance
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <ul class="menu-list">
+        <li class="menu-item">
+          <a href="#">
+            <i data-lucide="settings"></i>
+            Settings
+          </a>
+        </li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- MAIN WINDOW CONTAINER -->
+  <div style="flex: 1; display: flex; flex-direction: column;">
+    
+    <!-- TOP HEADER -->
+    <header class="header">
+      <div class="header-title">
+        <h1>Inventory Dashboard</h1>
+      </div>
+
+      <div class="search-bar">
+        <i data-lucide="search" class="search-icon"></i>
+        <input type="text" placeholder="Search inventory items, lots...">
+      </div>
+
+      <div class="header-actions">
+        <button class="action-btn" id="theme-toggle" title="Toggle Dark/Light Mode">
+          <i data-lucide="sun" id="sun-icon" style="display: none;"></i>
+          <i data-lucide="moon" id="moon-icon"></i>
+        </button>
+        
+        <button class="action-btn" title="View alerts">
+          <i data-lucide="bell"></i>
+          <span class="btn-badge"></span>
+        </button>
+
+        <div class="profile-avatar">
+          <img src="https://api.dicebear.com/7.x/initials/svg?seed=Harsh&backgroundColor=006a6a" alt="User Avatar">
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT WRAPPER -->
+    <main class="main-wrapper">
+      
+      <!-- ROW 1: STAT CARDS -->
+      <section class="stats-grid">
+        
+        <!-- Stat Card 1 -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Total Workers</span>
+            <div class="stat-icon-wrap icon-blue">
+              <i data-lucide="users" style="width: 18px; height: 18px;"></i>
+            </div>
+          </div>
+          <div class="stat-value">124</div>
+          <div class="stat-footer">
+            <span class="trend-up">▲ 4%</span> vs yesterday
+          </div>
+        </div>
+
+        <!-- Stat Card 2 -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Active Tasks</span>
+            <div class="stat-icon-wrap icon-teal">
+              <i data-lucide="activity" style="width: 18px; height: 18px;"></i>
+            </div>
+          </div>
+          <div class="stat-value">38</div>
+          <div class="stat-footer">
+            <span class="trend-up">▲ 12%</span> this shift
+          </div>
+        </div>
+
+        <!-- Stat Card 3 -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Completed Tasks</span>
+            <div class="stat-icon-wrap icon-teal">
+              <i data-lucide="check-circle-2" style="width: 18px; height: 18px;"></i>
+            </div>
+          </div>
+          <div class="stat-value">148</div>
+          <div class="stat-footer">
+            <span class="trend-up">▲ 98.2%</span> efficiency rate
+          </div>
+        </div>
+
+        <!-- Stat Card 4 -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Attendance Rate</span>
+            <div class="stat-icon-wrap icon-blue">
+              <i data-lucide="user-check" style="width: 18px; height: 18px;"></i>
+            </div>
+          </div>
+          <div class="stat-value">96.8%</div>
+          <div class="stat-footer">
+            <span class="trend-up">▲ 0.8%</span> safety threshold
+          </div>
+        </div>
+
+        <!-- Stat Card 5 -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Inventory Summary</span>
+            <div class="stat-icon-wrap icon-teal">
+              <i data-lucide="boxes" style="width: 18px; height: 18px;"></i>
+            </div>
+          </div>
+          <div class="stat-value">8,420</div>
+          <div class="stat-footer">
+            Total stored pallets
+          </div>
+        </div>
+
+        <!-- Stat Card 6 -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Low Stock SKUs</span>
+            <div class="stat-icon-wrap icon-red">
+              <i data-lucide="shield-alert" style="width: 18px; height: 18px;"></i>
+            </div>
+          </div>
+          <div class="stat-value" style="color: var(--error);">14</div>
+          <div class="stat-footer">
+            <span class="trend-down" style="color: var(--error);">▼ 2</span> pending restock
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ROW 2: CHART & HEALTH METRICS -->
+      <section class="dashboard-row-2">
+        
+        <!-- Left: Stock Movement Trend Chart -->
+        <div class="dashboard-panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Stock Movement Trend</h3>
+            <button class="panel-action-btn">
+              <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+              Export PDF
+            </button>
+          </div>
+          
+          <div class="chart-container">
+            <div class="chart-y-axis">
+              <span>100k</span>
+              <span>75k</span>
+              <span>50k</span>
+              <span>25k</span>
+              <span>0</span>
+            </div>
+            
+            <div class="chart-bars-wrap">
+              <div class="chart-bar-item">
+                <div class="chart-bar-pillar" style="height: 40%;" data-value="42,000 units"></div>
+                <span class="chart-bar-label">Jan</span>
+              </div>
+              <div class="chart-bar-item">
+                <div class="chart-bar-pillar" style="height: 60%;" data-value="61,500 units"></div>
+                <span class="chart-bar-label">Feb</span>
+              </div>
+              <div class="chart-bar-item">
+                <div class="chart-bar-pillar" style="height: 52%;" data-value="54,200 units"></div>
+                <span class="chart-bar-label">Mar</span>
+              </div>
+              <div class="chart-bar-item">
+                <div class="chart-bar-pillar" style="height: 80%;" data-value="82,400 units"></div>
+                <span class="chart-bar-label">Apr</span>
+              </div>
+              <div class="chart-bar-item">
+                <div class="chart-bar-pillar" style="height: 68%;" data-value="68,900 units"></div>
+                <span class="chart-bar-label">May</span>
+              </div>
+              <div class="chart-bar-item">
+                <div class="chart-bar-pillar" style="height: 94%;" data-value="95,800 units"></div>
+                <span class="chart-bar-label">Jun</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Inventory Health Metrics -->
+        <div class="dashboard-panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Inventory Health</h3>
+          </div>
+
+          <div class="health-list">
+            <!-- Metric 1 -->
+            <div class="health-item">
+              <div class="health-info">
+                <span class="health-label">Stock Availability</span>
+                <span>94.8%</span>
+              </div>
+              <div class="health-bar-bg">
+                <div class="health-bar-fill teal" style="width: 94.8%;"></div>
+              </div>
+            </div>
+
+            <!-- Metric 2 -->
+            <div class="health-item">
+              <div class="health-info">
+                <span class="health-label">Storage Utilization</span>
+                <span>82.3%</span>
+              </div>
+              <div class="health-bar-bg">
+                <div class="health-bar-fill blue" style="width: 82.3%;"></div>
+              </div>
+            </div>
+
+            <!-- Metric 3 -->
+            <div class="health-item">
+              <div class="health-info">
+                <span class="health-label">On-time Replenishment</span>
+                <span>89.5%</span>
+              </div>
+              <div class="health-bar-bg">
+                <div class="health-bar-fill teal" style="width: 89.5%;"></div>
+              </div>
+            </div>
+
+            <!-- Metric 4 -->
+            <div class="health-item">
+              <div class="health-info">
+                <span class="health-label">Quality Pass Rate</span>
+                <span>98.6%</span>
+              </div>
+              <div class="health-bar-bg">
+                <div class="health-bar-fill blue" style="width: 98.6%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Overall Status Badge -->
+          <div class="overall-status-box">
+            <span class="overall-label">Overall Health Status</span>
+            <div class="overall-badge">
+              EXCELLENT (96.4%)
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Javascript Logic -->
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Dark Mode Toggle Logic
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const sunIcon = document.getElementById('sun-icon');
+    const moonIcon = document.getElementById('moon-icon');
+    const htmlElement = document.documentElement;
+
+    // Check system preference or localStorage
+    const savedTheme = localStorage.getItem('smartops-inventory-theme') || 'light';
+    htmlElement.setAttribute('data-theme', savedTheme);
+    updateIcons(savedTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = htmlElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      htmlElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('smartops-inventory-theme', newTheme);
+      updateIcons(newTheme);
+    });
+
+    function updateIcons(theme) {
+      // Prevent browser forced dark mode by updating inline style and meta tag
+      htmlElement.style.colorScheme = theme === 'dark' ? 'only dark' : 'only light';
+      let meta = document.querySelector('meta[name="color-scheme"]');
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute('name', 'color-scheme');
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', theme === 'dark' ? 'only dark' : 'only light');
+
+      if (theme === 'dark') {
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+      } else {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

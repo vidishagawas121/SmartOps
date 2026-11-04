@@ -1,0 +1,21 @@
+{
+  "name": "smartops-unified-platform",
+  "version": "1.0.0",
+  "description": "SmartOps Unified Industrial & Logistics Platform — 4 Connected Dashboards (Owner, Supervisor, Driver, Worker)",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "frontend:dev": "npm run dev --workspace=frontend",
+    "backend:dev": "npm run dev --workspace=backend",
+    "dev": "concurrently --kill-others-on-fail --names \"BACKEND,FRONTEND\" --prefix-colors \"yellow,cyan\" \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "build": "npm run build --workspaces",
+    "install:all": "npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+

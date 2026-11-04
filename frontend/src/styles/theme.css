@@ -1,0 +1,598 @@
+/* ================================================================
+   SmartOps Enterprise — Theme Overrides
+   Premium card design, form styling, button effects, status pills
+   ================================================================ */
+
+/* ── Card Design — frosted glass, rounded-2xl, soft elevation ── */
+main .bg-white.rounded-3xl,
+main .bg-white.rounded-2xl,
+main .glass-panel,
+.glass-panel {
+  background: #FFFFFF !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 2px 8px -2px rgba(0, 0, 0, 0.04) !important;
+  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 280ms cubic-bezier(0.16, 1, 0.3, 1), border-color 280ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+main .bg-white.rounded-3xl:hover,
+main .bg-white.rounded-2xl:hover,
+main .glass-panel:hover,
+.glass-panel:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 30px -4px rgba(0, 106, 106, 0.1), 0 0 16px 2px rgba(0, 163, 163, 0.2) !important;
+  border-color: #00A3A3 !important;
+}
+
+/* Dark mode cards */
+.dark main .bg-white.rounded-3xl,
+.dark main .bg-white.rounded-2xl,
+.dark main .glass-panel,
+.dark main .dark\:bg-slate-900.rounded-3xl,
+.dark main .dark\:bg-slate-900.rounded-2xl,
+.dark main .dark\:bg-\[\#1E293B\].rounded-2xl {
+  background: #1E293B !important;
+  border: 1px solid #334155 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.3) !important;
+  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 280ms cubic-bezier(0.16, 1, 0.3, 1), border-color 280ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.dark .glass-panel {
+  background: #1E293B !important;
+  border: 1px solid #334155 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.3) !important;
+  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 280ms cubic-bezier(0.16, 1, 0.3, 1), border-color 280ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.dark main .bg-white.rounded-3xl:hover,
+.dark main .bg-white.rounded-2xl:hover,
+.dark main .glass-panel:hover,
+.dark .glass-panel:hover,
+.dark main .dark\:bg-slate-900.rounded-3xl:hover,
+.dark main .dark\:bg-slate-900.rounded-2xl:hover,
+.dark main .dark\:bg-\[\#1E293B\].rounded-2xl:hover {
+  transform: translateY(-4px) !important;
+  border-color: #7DF5F5 !important;
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.4), 0 0 20px 3px rgba(125, 245, 245, 0.28) !important;
+}
+
+/* ── Tables — floating container ── */
+.floating-table-container,
+main table,
+main .overflow-x-auto {
+  border-radius: 18px !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+/* ── Primary Button — Teal Gradient ── */
+.btn-primary,
+button.bg-primary,
+button.bg-teal-600 {
+  background: linear-gradient(135deg, #006A6A 0%, #00A3A3 100%) !important;
+  border: none !important;
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px 0 rgba(0, 106, 106, 0.15) !important;
+  transition: transform 200ms ease, box-shadow 200ms ease, opacity 200ms ease, border-color 200ms ease !important;
+}
+
+.btn-primary:hover,
+button.bg-primary:hover,
+button.bg-teal-600:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px 0 rgba(0, 106, 106, 0.25), 0 0 12px 3px rgba(0, 163, 163, 0.4) !important;
+  opacity: 0.95 !important;
+}
+
+.dark .btn-primary:hover,
+.dark button.bg-primary:hover,
+.dark button.bg-teal-600:hover {
+  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.3), 0 0 16px 4px rgba(125, 245, 245, 0.45) !important;
+}
+
+/* ── Secondary Button ── */
+.btn-secondary,
+button.bg-secondary {
+  background: #FFFFFF !important;
+  border: 1px solid var(--color-border) !important;
+  color: #545F73 !important;
+  font-weight: 600 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px 0 rgba(11, 28, 48, 0.03) !important;
+  transition: transform 200ms ease, box-shadow 200ms ease, background-color 200ms ease, border-color 200ms ease !important;
+}
+
+.btn-secondary:hover,
+button.bg-secondary:hover {
+  transform: translateY(-2px) !important;
+  background-color: #F8F9FF !important;
+  border-color: #00A3A3 !important;
+  box-shadow: 0 4px 12px 0 rgba(11, 28, 48, 0.05), 0 0 10px 2px rgba(0, 163, 163, 0.2) !important;
+}
+
+.dark .btn-secondary:hover,
+.dark button.bg-secondary:hover {
+  border-color: #7DF5F5 !important;
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.3), 0 0 12px 2px rgba(125, 245, 245, 0.3) !important;
+}
+
+/* ── Danger Button ── */
+.btn-danger,
+button.bg-danger {
+  background: #BA1A1A !important;
+  border: none !important;
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px 0 rgba(186, 26, 26, 0.15) !important;
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease !important;
+}
+
+.btn-danger:hover,
+button.bg-danger:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px 0 rgba(186, 26, 26, 0.25), 0 0 12px 2px rgba(186, 26, 26, 0.35) !important;
+}
+
+/* ── Status Pills ── */
+span.bg-emerald-50,
+span.bg-emerald-950\/20,
+.status-pill-success {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  color: #10B981 !important;
+  border: 1px solid rgba(16, 185, 129, 0.15) !important;
+  border-radius: 9999px !important;
+  padding: 4px 12px !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+span.bg-amber-50,
+span.bg-amber-950\/20,
+.status-pill-warning {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+  color: #F59E0B !important;
+  border: 1px solid rgba(245, 158, 11, 0.15) !important;
+  border-radius: 9999px !important;
+  padding: 4px 12px !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+span.bg-red-50,
+span.bg-red-950\/20,
+.status-pill-danger {
+  background-color: rgba(186, 26, 26, 0.08) !important;
+  color: #BA1A1A !important;
+  border: 1px solid rgba(186, 26, 26, 0.15) !important;
+  border-radius: 9999px !important;
+  padding: 4px 12px !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Dark status pills - keep bright for readability */
+.dark span.bg-emerald-950\/20 {
+  color: #34D399 !important;
+}
+
+.dark span.bg-amber-950\/20 {
+  color: #FBBF24 !important;
+}
+
+.dark span.bg-red-950\/20 {
+  color: #FCA5A5 !important;
+}
+
+/* ── Chrome Autofill ── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px var(--color-card) inset !important;
+  -webkit-text-fill-color: var(--color-text-primary) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ── Signature Canvas ── */
+.signature-canvas {
+  touch-action: none;
+}
+
+/* ── Form Inputs — premium, rounded-xl, soft focus glow ── */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="tel"],
+select,
+textarea {
+  height: 48px;
+  border-radius: 12px !important;
+  border: 1px solid var(--color-border) !important;
+  background-color: var(--color-card) !important;
+  color: var(--color-text-primary) !important;
+  padding: 0 16px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 1px 2px 0 rgba(11, 28, 48, 0.02) !important;
+  transition: border-color 200ms ease, box-shadow 200ms ease !important;
+}
+
+textarea {
+  height: auto !important;
+  padding: 12px 16px !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: #006A6A !important;
+  box-shadow: 0 0 0 3px rgba(0, 106, 106, 0.12), 0 1px 2px 0 rgba(11, 28, 48, 0.02) !important;
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #7DF5F5 !important;
+  box-shadow: 0 0 0 3px rgba(125, 245, 245, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ── Checkboxes ── */
+input[type="checkbox"] {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 4px !important;
+  accent-color: #006A6A !important;
+}
+
+.dark input[type="checkbox"] {
+  accent-color: #7DF5F5 !important;
+}
+
+/* ── Focus-visible for accessibility ── */
+*:focus-visible {
+  outline: 2px solid #006A6A;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.dark *:focus-visible {
+  outline-color: #7DF5F5;
+}
+
+/* 1a. Force white/important text to black when on white/light backgrounds (excluding buttons & badges) */
+html:not(.dark) :is(body,
+  main,
+  [class*="bg-white"],
+  [class*="bg-slate-55"],
+  [class*="bg-slate-100"],
+  [class*="bg-slate-200"],
+  [class*="bg-slate-300"],
+  [class*="bg-[#FFFFFF]"],
+  [class*="bg-[#ffffff]"]) :is(.text-white,
+  .text-\[\#F8FAFC\]):not(.btn-primary,
+  .btn-primary *,
+  button,
+  button *,
+  [class*="bg-[#006A6A]"],
+  [class*="bg-[#006A6A]"] *,
+  [class*="bg-teal"],
+  [class*="bg-teal"] *,
+  [class*="bg-emerald"],
+  [class*="bg-emerald"] *,
+  [class*="bg-red"],
+  [class*="bg-red"] *,
+  [class*="bg-rose"],
+  [class*="bg-rose"] *,
+  [class*="bg-blue"],
+  [class*="bg-blue"] *,
+  [class*="bg-success"],
+  [class*="bg-success"] *,
+  [class*="bg-danger"],
+  [class*="bg-danger"] *,
+  aside,
+  aside *) {
+  color: #000000 !important;
+}
+
+/* 1b. Force light grey/normal text to dark grey when on white/light backgrounds (excluding buttons & badges) */
+html:not(.dark) :is(body,
+  main,
+  [class*="bg-white"],
+  [class*="bg-slate-50"],
+  [class*="bg-slate-100"],
+  [class*="bg-slate-200"],
+  [class*="bg-slate-300"],
+  [class*="bg-[#FFFFFF]"],
+  [class*="bg-[#ffffff]"]) :is(.text-slate-100,
+  .text-slate-200,
+  .text-slate-300,
+  .text-\[\#cbd5e1\],
+  .text-\[\#CBD5E1\]):not(.btn-primary,
+  .btn-primary *,
+  button,
+  button *,
+  [class*="bg-[#006A6A]"],
+  [class*="bg-[#006A6A]"] *,
+  [class*="bg-teal"],
+  [class*="bg-teal"] *,
+  [class*="bg-emerald"],
+  [class*="bg-emerald"] *,
+  [class*="bg-red"],
+  [class*="bg-red"] *,
+  [class*="bg-rose"],
+  [class*="bg-rose"] *,
+  [class*="bg-blue"],
+  [class*="bg-blue"] *,
+  [class*="bg-success"],
+  [class*="bg-success"] *,
+  [class*="bg-danger"],
+  [class*="bg-danger"] *,
+  aside,
+  aside *) {
+  color: #4B5563 !important;
+}
+
+/* 2a. Force important/primary text to white when on black/dark backgrounds (excluding inputs/dropdowns/textareas) */
+:is(.dark,
+  [class*="bg-slate-9"],
+  [class*="bg-slate-950"],
+  [class*="bg-[#0B1C30]"],
+  [class*="bg-[#0b1c30]"],
+  [class*="bg-black"],
+  [class*="bg-slate-8"],
+  [class*="from-slate-9"],
+  [class*="from-slate-8"],
+  [class*="from-[#0B1C30]"],
+  [class*="from-[#0b1c30]"]) :is(.text-slate-700,
+  .text-slate-800,
+  .text-slate-900,
+  .text-slate-950,
+  .text-black,
+  .text-\[\#0B1C30\],
+  .text-\[\#0b1c30\],
+  .text-\[\#111827\],
+  .dark\:text-\[\#F8FAFC\]):not(input, textarea, select) {
+  color: #FFFFFF !important;
+}
+
+/* 2b. Force normal/muted text to light grey when on black/dark backgrounds (excluding inputs/dropdowns/textareas) */
+:is(.dark,
+  [class*="bg-slate-9"],
+  [class*="bg-slate-950"],
+  [class*="bg-[#0B1C30]"],
+  [class*="bg-[#0b1c30]"],
+  [class*="bg-black"],
+  [class*="bg-slate-8"],
+  [class*="from-slate-9"],
+  [class*="from-slate-8"],
+  [class*="from-[#0B1C30]"],
+  [class*="from-[#0b1c30]"]) :is(.text-slate-300,
+  .text-slate-400,
+  .text-slate-500,
+  .text-slate-600,
+  .text-gray-555,
+  .text-gray-655,
+  .text-gray-755,
+  .text-gray-855,
+  .text-gray-955,
+  .text-\[\#CBD5E1\],
+  .text-\[\#cbd5e1\],
+  .text-\[\#94A3B8\],
+  .text-\[\#94a3b8\],
+  .text-\[\#6D7A79\],
+  .text-\[\#6d7a79\],
+  .text-\[\#545F73\],
+  .text-\[\#545f73\],
+  .dark\:text-slate-300,
+  .dark\:text-slate-400,
+  .dark\:text-slate-555,
+  .dark\:text-slate-655):not(input, textarea, select) {
+  color: #D1D5DB !important;
+}
+
+/* ── Modal, Dialog & Overlay Contrast Rules ── */
+.modal-overlay {
+  background-color: transparent;
+}
+
+.dark .modal-overlay {
+  background-color: transparent;
+}
+
+.modal-container,
+[role="dialog"] {
+  background-color: var(--color-modal-bg) !important;
+  color: var(--color-text-body);
+}
+
+.modal-title {
+  color: var(--color-text-heading) !important;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.modal-description {
+  color: var(--color-text-body) !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  line-height: 1.6 !important;
+}
+
+.modal-subtitle {
+  color: var(--color-text-subtle) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+.warning-card {
+  background-color: var(--color-bg-warning) !important;
+  border: 1px solid var(--color-border-warning) !important;
+  color: var(--color-text-warning) !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+}
+
+.warning-card p,
+.warning-card span {
+  color: var(--color-text-warning) !important;
+}
+
+  /* ── Navbar Search Input Overrides ── */
+  input.navbar-search-input {
+    height: 36px !important;
+    border-radius: 9999px !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid var(--color-border) !important;
+    padding-left: 36px !important;
+    padding-right: 12px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    color: #000000 !important;
+    transition: border-color 200ms ease, box-shadow 200ms ease !important;
+  }
+
+  input.navbar-search-input::placeholder {
+    color: rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .dark input.navbar-search-input {
+    background-color: #1E293B !important;
+    border: 1px solid #334155 !important;
+    color: #F8FAFC !important;
+  }
+
+  .dark input.navbar-search-input::placeholder {
+    color: rgba(248, 250, 252, 0.5) !important;
+  }
+
+  input.navbar-search-input:focus {
+    border-color: #006A6A !important;
+    box-shadow: 0 0 0 1px #006A6A !important;
+  }
+
+  .dark input.navbar-search-input:focus {
+    border-color: #7DF5F5 !important;
+    box-shadow: 0 0 0 1px #7DF5F5 !important;
+  }
+
+  /* Search Icon Glow */
+  .search-icon-glow {
+    color: #00A3A3 !important;
+    filter: drop-shadow(0 0 2px rgba(0, 163, 163, 0.65)) !important;
+  }
+
+  .dark .search-icon-glow {
+    color: #7DF5F5 !important;
+    filter: drop-shadow(0 0 4px rgba(125, 245, 245, 0.8)) !important;
+  }
+
+  /* ── KPI Card & Header Text Contrast Overrides ── */
+  html:not(.dark) .text-\[\#0B1C30\],
+  html:not(.dark) .text-\[\#0b1c30\] {
+    color: #0B1C30 !important;
+  }
+
+  .dark .text-\[\#0B1C30\],
+  .dark .text-\[\#0b1c30\],
+  .dark .dark\:text-white {
+    color: #FFFFFF !important;
+  }
+
+  /* ── Sidebar Text Contrast Overrides (Prevent Light Theme Darkening) ── */
+  aside.bg-\[\#0F172A\] .text-\[\#999999\] {
+    color: #999999 !important;
+  }
+
+  aside.bg-\[\#0F172A\] .text-\[\#64748B\],
+  aside.bg-\[\#0F172A\] .text-\[\#64748b\] {
+    color: #94A3B8 !important;
+  }
+
+  aside.bg-\[\#0F172A\] .text-white {
+    color: #FFFFFF !important;
+  }
+
+  aside.bg-\[\#0F172A\] a:hover .text-\[\#999999\],
+  aside.bg-\[\#0F172A\] a:hover span,
+  aside.bg-\[\#0F172A\] a:hover svg {
+    color: #FFFFFF !important;
+  }
+
+  /* Force spans inside Sidebar links/buttons to inherit parent color instead of tag defaults */
+  aside.bg-\[\#0F172A\] a span,
+  aside.bg-\[\#0F172A\] button span {
+    color: inherit !important;
+  }
+
+/* ==========================================================================
+   Premium Form Inputs & Selects Depth System
+   Inner shadows for inset depth, custom rounded borders, focus transitions,
+   and clean dark mode contrast variables.
+   ========================================================================== */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="tel"],
+select,
+textarea {
+  border: 1px solid #D1D5DB !important;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05) !important;
+  border-radius: 12px !important;
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+input[type="tel"]:focus,
+select:focus,
+textarea:focus {
+  border-color: #006A6A !important;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05), 0 0 0 3.5px rgba(0, 106, 106, 0.15) !important;
+  outline: none !important;
+}
+
+.dark input[type="text"],
+.dark input[type="number"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="date"],
+.dark input[type="tel"],
+.dark select,
+.dark textarea {
+  border: 1px solid #475569 !important;
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.25) !important;
+}
+
+.dark input[type="text"]:focus,
+.dark input[type="number"]:focus,
+.dark input[type="email"]:focus,
+.dark input[type="password"]:focus,
+.dark input[type="date"]:focus,
+.dark input[type="tel"]:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #7DF5F5 !important;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.25), 0 0 0 3.5px rgba(125, 245, 245, 0.25) !important;
+}

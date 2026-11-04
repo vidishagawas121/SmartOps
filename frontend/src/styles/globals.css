@@ -1,0 +1,257 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import "tailwindcss";
+@import "./variables.css";
+@import "./animations.css";
+@import "./theme.css";
+
+@custom-variant dark {
+  &:where(.dark, .dark *) {
+    @slot;
+  }
+}
+
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --color-primary: var(--color-primary);
+  --color-primary-container: var(--color-primary-container);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-container: var(--color-secondary-container);
+  --color-tertiary: var(--color-tertiary);
+  --color-tertiary-container: var(--color-tertiary-container);
+  
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+  --color-info: var(--color-info);
+  
+  --color-bg: var(--color-bg);
+  --color-card: var(--color-card);
+  --color-sidebar: var(--color-sidebar);
+  --color-navbar: var(--color-navbar);
+  
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-disabled: var(--color-text-disabled);
+  
+  --color-border-custom: var(--color-border);
+  --color-outline: var(--color-outline);
+  
+  /* Custom brand color tokens */
+  --color-brand-primary: #006A6A;
+  --color-brand-primary-hover: #005555;
+  --color-navy-dark: #0B1C30;
+  
+  --color-gray-50: var(--color-surface-low);
+  --color-gray-100: var(--color-border);
+  --color-gray-200: var(--color-outline-variant);
+  --color-gray-300: var(--color-outline-variant);
+  
+  --color-blue-50: var(--color-primary-fixed);
+  --color-blue-100: var(--color-primary-fixed-dim);
+  --color-blue-500: var(--color-primary-container);
+  --color-blue-600: var(--color-primary);
+  --color-blue-700: var(--color-primary);
+  --color-blue-800: var(--color-on-primary-container);
+  --color-blue-900: var(--color-on-primary-container);
+  
+  --color-emerald-50: var(--color-success-container);
+  --color-emerald-500: var(--color-success);
+  --color-emerald-600: var(--color-success);
+  --color-emerald-700: var(--color-success);
+  
+  --color-red-50: var(--color-danger-container);
+  --color-red-500: var(--color-danger);
+  --color-red-600: var(--color-danger);
+  --color-red-700: var(--color-danger);
+  
+  --color-orange-50: var(--color-warning-container);
+  --color-orange-500: var(--color-warning);
+  --color-orange-600: var(--color-warning);
+  --color-amber-50: var(--color-warning-container);
+  --color-amber-500: var(--color-warning);
+  --color-amber-600: var(--color-warning);
+  
+  --color-sky-50: var(--color-info-container);
+  --color-sky-500: var(--color-info);
+  --color-sky-600: var(--color-info);
+
+  /* Radius system — rounded-xl enterprise look */
+  --radius-3xl: 20px;
+  --radius-2xl: 18px;
+  --radius-xl: 14px;
+  --radius-lg: 12px;
+
+  /* Premium elevation shadows */
+  --shadow-sm: 0 1px 3px 0 rgba(11, 28, 48, 0.03), 0 1px 2px -1px rgba(11, 28, 48, 0.02);
+  --shadow-md: 0 4px 12px -2px rgba(11, 28, 48, 0.05), 0 2px 6px -2px rgba(11, 28, 48, 0.03);
+  --shadow-lg: 0 10px 25px -5px rgba(11, 28, 48, 0.06), 0 8px 10px -6px rgba(11, 28, 48, 0.02);
+  --shadow-xl: 0 20px 40px -10px rgba(11, 28, 48, 0.08), 0 10px 15px -8px rgba(11, 28, 48, 0.03);
+  --shadow-2xl: 0 25px 60px -12px rgba(11, 28, 48, 0.15);
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html:not(.dark) {
+  color-scheme: light;
+}
+
+/* Chrome Force Dark Mode & High Contrast Safeguards */
+@media (forced-colors: active) {
+  * {
+    forced-color-adjust: auto;
+  }
+}
+
+/* Chrome Force Dark Mode Protection for arbitrary hardcoded dark hex colors */
+.text-\[\#0B1C30\] {
+  color: var(--color-text-primary) !important;
+}
+
+.dark .text-\[\#0B1C30\] {
+  color: #F8FAFC !important;
+}
+
+.text-\[\#545F73\] {
+  color: var(--color-text-secondary) !important;
+}
+
+.dark .text-\[\#545F73\] {
+  color: #CBD5E1 !important;
+}
+
+.text-\[\#6D7A79\] {
+  color: var(--color-text-muted) !important;
+}
+
+.dark .text-\[\#6D7A79\] {
+  color: #94A3B8 !important;
+}
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transition: background-color 250ms ease, border-color 250ms ease, color 200ms ease, fill 200ms ease, stroke 200ms ease, box-shadow 200ms ease;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── Typography Scale ── */
+  h1, .page-heading {
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--color-text-primary);
+  }
+
+  h2, .section-heading {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+  }
+
+  h3, .card-heading {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+  }
+
+  .card-numbers {
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--color-text-primary);
+  }
+
+  th, .table-header {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+
+  body, p, .body-text {
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+  }
+
+  .caption-text, .small-text {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--color-text-muted);
+  }
+
+  /* ── Custom Scrollbar ── */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-outline-variant);
+    opacity: 0.4;
+    border-radius: 100px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-muted);
+  }
+}
+
+/* ── Glassmorphism Utilities ── */
+@layer utilities {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--color-border);
+  }
+
+  .dark .glass-card {
+    background: rgba(30, 41, 59, 0.72);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--color-border);
+  }
+
+  .glass-surface {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .dark .glass-surface {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
