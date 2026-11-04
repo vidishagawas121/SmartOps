@@ -441,7 +441,11 @@ export const OperationsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const res = await api.auth.updateProfile(payload);
     if (res?.user) {
       setUser(res.user);
-      localStorage.setItem('smartops_user', JSON.stringify(res.user)); if (res.token) { localStorage.setItem('smartops_jwt', res.token); localStorage.setItem('smartops_token', res.token); }
+      localStorage.setItem('smartops_user', JSON.stringify(res.user));
+      if (res.token) {
+        localStorage.setItem('smartops_jwt', res.token);
+        localStorage.setItem('smartops_token', res.token);
+      }
     }
     // Refresh company and profile data across components
     refreshAllData();

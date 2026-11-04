@@ -189,8 +189,10 @@ export const api = {
       email?: string;
       mobileNumber?: string;
       companyName?: string;
+      licenseNumber?: string;
+      vehicleNumber?: string;
       avatarUrl?: string;
-    }): Promise<{ success: boolean; message: string; user: User }> => {
+    }): Promise<{ success: boolean; message: string; user: User; token?: string }> => {
       try {
         const res = await axiosInstance.put('/users/profile', payload);
         if (res.data.user) {
@@ -254,8 +256,10 @@ export const api = {
       email?: string;
       mobileNumber?: string;
       companyName?: string;
+      licenseNumber?: string;
+      vehicleNumber?: string;
       avatarUrl?: string;
-    }): Promise<{ success: boolean; message: string; user: User }> => {
+    }): Promise<{ success: boolean; message: string; user: User; token?: string }> => {
       const res = await axiosInstance.put('/users/profile', payload);
       if (res.data.user) {
         localStorage.setItem('smartops_user', JSON.stringify(res.data.user));
