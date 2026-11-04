@@ -252,7 +252,7 @@ const Inventory = ({ searchVal, showToast, onAddClick, onEditClick, onReorderCli
     const textColor = pct < 50 ? 'text-error' : 'text-on-surface';
     return (
       <div className="flex items-center gap-2">
-        <span className={`font-semibold min-w-[48px] ${textColor}`}>{item.qty.toLocaleString('en-IN')}</span>
+        <span className={`font-semibold min-w-[48px] ${textColor}`}>{(item.qty ?? item.quantity ?? 0).toLocaleString('en-IN')}</span>
         <div className="w-[80px] h-[5px] bg-surface-container-high rounded-full overflow-hidden inline-block">
           <div className={`h-full rounded-full transition-all duration-300 ${color}`} style={{ width: `${pct}%` }}></div>
         </div>
@@ -282,7 +282,7 @@ const Inventory = ({ searchVal, showToast, onAddClick, onEditClick, onReorderCli
   };
 
   // Format currency
-  const formatINR = (num) => '₹' + num.toLocaleString('en-IN');
+  const formatINR = (num) => '₹' + (num ?? 0).toLocaleString('en-IN');
 
   const categories = [
     { key: 'all', label: 'All Items' },
@@ -476,7 +476,7 @@ const Inventory = ({ searchVal, showToast, onAddClick, onEditClick, onReorderCli
                         </div>
                         <div>
                           <p className="font-semibold text-on-surface leading-snug">{item.name}</p>
-                          <span className="text-[10px] text-outline">Min threshold: {item.threshold.toLocaleString('en-IN')} units</span>
+                          <span className="text-[10px] text-outline">Min threshold: {(item.threshold ?? item.minimumQuantity ?? 0).toLocaleString('en-IN')} units</span>
                         </div>
                       </div>
                     </td>

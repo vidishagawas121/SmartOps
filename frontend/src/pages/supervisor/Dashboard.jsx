@@ -139,10 +139,10 @@ const Dashboard = ({ searchVal, showToast, onReorderClick, refreshTrigger }) => 
     } else if (num >= 100000) {
       return `₹${(num / 100000).toFixed(1)} Lakh`;
     }
-    return '₹' + num.toLocaleString('en-IN');
+    return '₹' + (num ?? 0).toLocaleString('en-IN');
   };
 
-  const formatNumber = (num) => num.toLocaleString('en-IN');
+  const formatNumber = (num) => (num ?? 0).toLocaleString('en-IN');
 
   const criticalBannerItem = items.find(item => item.status === 'critical' && item.qty < 10);
 

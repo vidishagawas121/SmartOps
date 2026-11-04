@@ -98,14 +98,14 @@ export const Inventory: React.FC = () => {
     }
   };
   // Calculate stats
-  const totalItemsVal = inventory.reduce((acc, curr) => acc + curr.quantity * curr.sellingPrice, 0);
-  const lowStockCount = inventory.filter(i => i.quantity <= i.minimumQuantity && i.quantity > 0).length;
-  const outOfStockCount = inventory.filter(i => i.quantity === 0).length;
+  const totalItemsVal = inventory.reduce((acc, curr) => acc + ((curr.quantity ?? (curr as any).qty ?? 0) * (curr.sellingPrice ?? (curr as any).val ?? 0)), 0);
+  const lowStockCount = inventory.filter(i => (i.quantity ?? (i as any).qty ?? 0) <= (i.minimumQuantity ?? (i as any).threshold ?? 0) && (i.quantity ?? (i as any).qty ?? 0) > 0).length;
+  const outOfStockCount = inventory.filter(i => (i.quantity ?? (i as any).qty ?? 0) === 0).length;
 
   const handleFilter = (data: InventoryItem[]) => {
     if (filterType === 'All') return data;
-    if (filterType === 'Low Stock') return data.filter(i => i.quantity <= i.minimumQuantity && i.quantity > 0);
-    if (filterType === 'Out Of Stock') return data.filter(i => i.quantity === 0);
+    if (filterType === 'Low Stock') return data.filter(i => (i.quantity ?? (i as any).qty ?? 0) <= (i.minimumQuantity ?? (i as any).threshold ?? 0) && (i.quantity ?? (i as any).qty ?? 0) > 0);
+    if (filterType === 'Out Of Stock') return data.filter(i => (i.quantity ?? (i as any).qty ?? 0) === 0);
     return data;
   };
 
@@ -129,7 +129,7 @@ export const Inventory: React.FC = () => {
       header: 'Stock Levels',
       accessor: (row: InventoryItem) => (
         <span className="font-semibold text-slate-700 dark:text-[#CBD5E1]">
-          {row.quantity.toLocaleString()} {row.unit || 'Pieces'} / {row.minimumQuantity?.toLocaleString() || 0} Min
+          {(row.quantity ?? (row as any).qty ?? 0).toLocaleString()} {row.unit || 'Pieces'} / {(row.minimumQuantity ?? (row as any).threshold ?? 0).toLocaleString()} Min
         </span>
       ),
       sortKey: 'quantity' as keyof InventoryItem,
@@ -241,7 +241,7 @@ export const Inventory: React.FC = () => {
               Total Stock Valuation
             </span>
             <h4 className="text-[26px] font-extrabold text-[#0B1C30] dark:text-white leading-tight">
-              INR {totalItemsVal.toLocaleString()}
+              INR {(totalItemsVal || 0).toLocaleString()}
             </h4>
             <p className="text-[11px] text-[#6D7A79] dark:text-slate-400 mt-0.5 font-medium">
               Calculated using selling values

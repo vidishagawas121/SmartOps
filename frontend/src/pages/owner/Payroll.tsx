@@ -189,7 +189,7 @@ export const Payroll: React.FC = () => {
     },
     {
       header: 'Basic Salary',
-      accessor: (row: PayrollRecord) => `INR ${row.basicSalary.toLocaleString()}`,
+      accessor: (row: PayrollRecord) => `INR ${(row.basicSalary ?? (row as any).baseSalary ?? 0).toLocaleString()}`,
       sortKey: 'basicSalary' as keyof PayrollRecord,
     },
     {
@@ -199,7 +199,7 @@ export const Payroll: React.FC = () => {
     {
       header: 'Net Pay',
       accessor: (row: PayrollRecord) => (
-        <span className="font-bold text-slate-800 dark:text-[#F8FAFC] text-sm">INR {row.finalSalary.toLocaleString()}</span>
+        <span className="font-bold text-slate-800 dark:text-[#F8FAFC] text-sm">INR {(row.finalSalary ?? (row as any).netSalary ?? 0).toLocaleString()}</span>
       ),
       sortKey: 'finalSalary' as keyof PayrollRecord,
     },
@@ -278,7 +278,7 @@ export const Payroll: React.FC = () => {
           </div>
           <div>
             <span className="text-[13px] font-semibold text-[#6D7A79] dark:text-[#6D7A79] uppercase tracking-tight block">Total Net Payroll</span>
-            <h4 className="text-[22px] font-extrabold text-[#0B1C30] dark:text-white leading-tight">INR {totalPayout.toLocaleString()}</h4>
+            <h4 className="text-[22px] font-extrabold text-[#0B1C30] dark:text-white leading-tight">INR {(totalPayout || 0).toLocaleString()}</h4>
             <p className="text-[11px] text-[#6D7A79] mt-0.5 font-medium">Aggregated payouts</p>
           </div>
         </div>
@@ -412,7 +412,7 @@ export const Payroll: React.FC = () => {
             <div className="bg-[#F8F9FF] dark:bg-[#0F172A]/60 rounded-xl p-4.5 border border-[#E5EEFF] dark:border-[#334155] dark:border-slate-800/80 flex justify-between items-center text-sm font-bold text-slate-700 dark:text-[#CBD5E1]">
               <span>Auto-Calculated Net Pay:</span>
               <span className="text-[#006A6A] dark:text-[#14B8A6]">
-                INR {calculateFinalSalary(form.basicSalary, form.overtime, form.bonus).toLocaleString()}
+                INR {(calculateFinalSalary(form.basicSalary, form.overtime, form.bonus) || 0).toLocaleString()}
               </span>
             </div>
 

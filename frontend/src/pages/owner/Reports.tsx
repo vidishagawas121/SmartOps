@@ -156,7 +156,7 @@ export const Reports: React.FC = () => {
           { label: 'Active Fleet Size', value: `${vehicles.length} Units` },
           { label: 'Total Fuel Audited', value: `${Math.round(sumFuel)} L` },
           { label: 'Total Distance', value: `${Math.round(sumDistance)} km` },
-          { label: 'Total Service Cost', value: `INR ${sumCost.toLocaleString()}` }
+          { label: 'Total Service Cost', value: `INR ${(sumCost || 0).toLocaleString()}` }
         ];
 
         totals = [
@@ -290,9 +290,9 @@ export const Reports: React.FC = () => {
 
         kpis = [
           { label: 'Payroll Size', value: `${payroll.length} Employees` },
-          { label: 'Gross Salary Pool', value: `INR ${sumBasic.toLocaleString()}` },
+          { label: 'Gross Salary Pool', value: `INR ${(sumBasic || 0).toLocaleString()}` },
           { label: 'Overtime Logs', value: `${sumOtHours.toFixed(1)} Hrs` },
-          { label: 'Total Disbursed', value: `INR ${sumTotal.toLocaleString()}` }
+          { label: 'Total Disbursed', value: `INR ${(sumTotal || 0).toLocaleString()}` }
         ];
 
         totals = [

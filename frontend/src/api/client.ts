@@ -318,7 +318,27 @@ export const api = {
     getAll: async (): Promise<InventoryItem[]> => {
       const res = await axiosInstance.get('/inventory');
       const list = Array.isArray(res.data) ? res.data : (Array.isArray(res.data?.data) ? res.data.data : []);
-      return list.map((item: any) => ({ ...item, id: item._id || item.id }));
+      return list.map((item: any) => ({
+        ...item,
+        id: item._id || item.id,
+        itemName: item.itemName || item.name || 'Unnamed Material',
+        name: item.name || item.itemName || 'Unnamed Material',
+        category: item.category || item.cat || 'Raw Materials',
+        cat: item.cat || item.category || 'Raw Materials',
+        sku: item.sku || 'SKU-GEN',
+        quantity: Number(item.quantity ?? item.qty ?? 0),
+        qty: Number(item.qty ?? item.quantity ?? 0),
+        minimumQuantity: Number(item.minimumQuantity ?? item.threshold ?? 0),
+        threshold: Number(item.threshold ?? item.minimumQuantity ?? 0),
+        warehouse: item.warehouse || item.loc || 'Main Facility',
+        loc: item.loc || item.warehouse || 'Main Facility',
+        purchasePrice: Number(item.purchasePrice ?? item.val ?? 0),
+        sellingPrice: Number(item.sellingPrice ?? item.val ?? 0),
+        val: Number(item.val ?? item.sellingPrice ?? item.purchasePrice ?? 0),
+        unit: item.unit || 'Units',
+        supplier: item.supplier || 'Internal Stock',
+        status: item.status || ((item.quantity ?? item.qty ?? 0) <= (item.minimumQuantity ?? item.threshold ?? 0) ? 'Low Stock' : 'In Stock')
+      }));
     },
     create: async (item: Omit<InventoryItem, 'id'>): Promise<InventoryItem> => {
       const res = await axiosInstance.post('/inventory', item);
@@ -391,7 +411,21 @@ export const api = {
       try {
         const res = await axiosInstance.get('/salary');
         const list = Array.isArray(res.data) ? res.data : (Array.isArray(res.data?.data) ? res.data.data : []);
-        return list.map((item: any) => ({ ...item, id: item._id || item.id }));
+        return list.map((item: any) => ({
+          ...item,
+          id: item._id || item.id,
+          employee: item.employee || item.worker?.name || item.workerName || 'Worker Staff',
+          basicSalary: Number(item.basicSalary ?? item.baseSalary ?? item.monthlySalary ?? 0),
+          baseSalary: Number(item.baseSalary ?? item.basicSalary ?? item.monthlySalary ?? 0),
+          overtime: Number(item.overtime ?? item.overtimePay ?? 0),
+          bonus: Number(item.bonus ?? item.performanceBonus ?? 0),
+          allowance: Number(item.allowance ?? 0),
+          deduction: Number(item.deduction ?? item.deductions ?? 0),
+          tax: Number(item.tax ?? item.tds ?? 0),
+          finalSalary: Number(item.finalSalary ?? item.netSalary ?? item.basicSalary ?? item.baseSalary ?? 0),
+          netSalary: Number(item.netSalary ?? item.finalSalary ?? 0),
+          paymentStatus: item.paymentStatus || (item.isPaid ? 'Paid' : 'Pending')
+        }));
       } catch (err) {
         console.warn('[SmartOps Salary API] Fetch failed:', err);
         return [];

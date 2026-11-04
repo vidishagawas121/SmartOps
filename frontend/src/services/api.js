@@ -221,7 +221,28 @@ export const api = {
   getInventory: async (params) => {
     const query = buildQueryString(params);
     const res = await authFetch(`${API_URL}/inventory${query}`);
-    return res.json();
+    const data = await res.json();
+    const normalizeItem = (item) => ({
+      ...item,
+      qty: Number(item.qty ?? item.quantity ?? 0),
+      quantity: Number(item.quantity ?? item.qty ?? 0),
+      threshold: Number(item.threshold ?? item.minimumQuantity ?? 0),
+      minimumQuantity: Number(item.minimumQuantity ?? item.threshold ?? 0),
+      name: item.name || item.itemName || 'Material Item',
+      itemName: item.itemName || item.name || 'Material Item',
+      val: Number(item.val ?? item.sellingPrice ?? item.purchasePrice ?? 0),
+      sellingPrice: Number(item.sellingPrice ?? item.val ?? 0),
+      cat: item.cat || item.category || 'General',
+      category: item.category || item.cat || 'General',
+      loc: item.loc || item.warehouse || 'Main Facility',
+      warehouse: item.warehouse || item.loc || 'Main Facility'
+    });
+    if (data && Array.isArray(data.data)) {
+      return { ...data, data: data.data.map(normalizeItem) };
+    } else if (Array.isArray(data)) {
+      return data.map(normalizeItem);
+    }
+    return data;
   },
 
   getItem: async (id) => {

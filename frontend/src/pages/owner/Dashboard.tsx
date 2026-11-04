@@ -517,7 +517,7 @@ export const Dashboard: React.FC = () => {
         <KPICard
           id="rev"
           title="Gross Revenue"
-          value={`₹${totalInventoryRevenue.toLocaleString()}`}
+          value={`₹${(totalInventoryRevenue || 0).toLocaleString()}`}
           description="Total inventory value"
           change=""
           isPositive={true}

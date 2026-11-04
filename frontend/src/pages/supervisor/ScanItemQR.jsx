@@ -525,11 +525,11 @@ const ScanItemQR = ({ showToast, triggerRefresh, onReorderClick, user }) => {
                   </div>
                   <div className="flex flex-col gap-1">
                     <span className="text-[10px] font-bold text-outline uppercase tracking-wider">Safety Threshold</span>
-                    <span className="text-xs font-bold text-on-surface-variant">{scannedItem.threshold.toLocaleString('en-IN')} units</span>
+                    <span className="text-xs font-bold text-on-surface-variant">{(scannedItem.threshold ?? scannedItem.minimumQuantity ?? 0).toLocaleString('en-IN')} units</span>
                   </div>
                   <div className="flex flex-col gap-1">
                     <span className="text-[10px] font-bold text-outline uppercase tracking-wider">Unit Value (INR)</span>
-                    <span className="text-xs font-extrabold text-on-surface">₹{scannedItem.val.toLocaleString('en-IN')}</span>
+                    <span className="text-xs font-extrabold text-on-surface">₹{(scannedItem.val ?? scannedItem.sellingPrice ?? scannedItem.purchasePrice ?? 0).toLocaleString('en-IN')}</span>
                   </div>
                   <div className="flex flex-col gap-1">
                     <span className="text-[10px] font-bold text-outline uppercase tracking-wider">GST Rate</span>
@@ -537,7 +537,7 @@ const ScanItemQR = ({ showToast, triggerRefresh, onReorderClick, user }) => {
                   </div>
                   <div className="flex flex-col gap-1">
                     <span className="text-[10px] font-bold text-outline uppercase tracking-wider">Current Quantity</span>
-                    <span className="text-xs font-black text-primary">{scannedItem.qty.toLocaleString('en-IN')} units</span>
+                    <span className="text-xs font-black text-primary">{(scannedItem.qty ?? scannedItem.quantity ?? 0).toLocaleString('en-IN')} units</span>
                   </div>
                   <div className="flex flex-col gap-1">
                     <span className="text-[10px] font-bold text-outline uppercase tracking-wider">Last Sync Date</span>
@@ -683,7 +683,7 @@ const ScanItemQR = ({ showToast, triggerRefresh, onReorderClick, user }) => {
                                 {isIn ? '+ Added' : '- Dispatched'}
                               </span>
                               <div>
-                                <p className="text-xs font-bold text-on-surface-variant">{log.qty.toLocaleString('en-IN')} units</p>
+                                <p className="text-xs font-bold text-on-surface-variant">{(log.qty ?? log.quantity ?? 0).toLocaleString('en-IN')} units</p>
                                 <span className="text-[10px] text-outline">By {log.op} · {log.loc}</span>
                               </div>
                             </div>
