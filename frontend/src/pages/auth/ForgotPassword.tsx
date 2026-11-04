@@ -133,7 +133,11 @@ export const ForgotPassword: React.FC = () => {
 
   const handleGoogleSuccess = (res: any) => {
     if (res.user) {
-      navigate(res.user.role === 'Driver' ? '/driver' : '/owner');
+      const role = (res.user.role || '').toLowerCase();
+      if (role === 'driver') navigate('/driver');
+      else if (role === 'supervisor') navigate('/supervisor');
+      else if (role === 'worker') navigate('/worker');
+      else navigate('/owner');
     }
   };
 

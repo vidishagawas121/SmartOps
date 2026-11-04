@@ -72,8 +72,13 @@ export const Navbar: React.FC = () => {
   };
 
   const handleProfileClick = () => {
-    if (isDriver) {
+    const role = (user?.role || '').toLowerCase();
+    if (role === 'driver') {
       navigate('/driver/profile');
+    } else if (role === 'supervisor') {
+      navigate('/supervisor/settings');
+    } else if (role === 'worker') {
+      navigate('/worker/profile');
     } else {
       navigate('/owner/profile');
     }
@@ -81,8 +86,15 @@ export const Navbar: React.FC = () => {
 
   const handleNotificationsClick = () => {
     setShowNotifications(false);
-    if (isDriver) {
+    const role = (user?.role || '').toLowerCase();
+    if (role === 'driver') {
       navigate('/driver/notifications');
+    } else if (role === 'supervisor') {
+      navigate('/supervisor/alerts');
+    } else if (role === 'worker') {
+      navigate('/worker');
+    } else {
+      navigate('/owner/settings');
     }
   };
 

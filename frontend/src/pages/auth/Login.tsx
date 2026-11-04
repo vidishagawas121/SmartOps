@@ -78,12 +78,13 @@ export const Login: React.FC = () => {
   const [loading,      setLoading]      = useState(false);
   const [errorMsg,     setErrorMsg]     = useState('');
 
-  // Unchanged auth logic ──────────────────────────────────────────────────────
+  // Session redirection logic ──────────────────────────────────────────────────
   React.useEffect(() => {
     if (user) {
-      if (user.role === 'Driver') navigate('/driver');
-      else if (user.role === 'Supervisor') navigate('/supervisor');
-      else if (user.role === 'Worker') navigate('/worker');
+      const role = (user.role || '').toLowerCase();
+      if (role === 'driver') navigate('/driver');
+      else if (role === 'supervisor') navigate('/supervisor');
+      else if (role === 'worker') navigate('/worker');
       else navigate('/owner');
     }
   }, [user, navigate]);
@@ -131,7 +132,11 @@ export const Login: React.FC = () => {
 
   const handleGoogleSuccess = (res: any) => {
     if (res.user) {
-      navigate(res.user.role === 'Driver' ? '/driver' : '/owner');
+      const role = (res.user.role || '').toLowerCase();
+      if (role === 'driver') navigate('/driver');
+      else if (role === 'supervisor') navigate('/supervisor');
+      else if (role === 'worker') navigate('/worker');
+      else navigate('/owner');
     }
   };
 

@@ -13,6 +13,7 @@ export interface DashboardOption {
   icon: React.FC<{ size?: number; className?: string }>;
   color: string;
   bgLight: string;
+  demoEmail: string;
 }
 
 export const DASHBOARDS: DashboardOption[] = [
@@ -26,6 +27,7 @@ export const DASHBOARDS: DashboardOption[] = [
     icon: Crown,
     color: 'text-amber-500',
     bgLight: 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400',
+    demoEmail: 'owner@smartops.com',
   },
   {
     id: 'supervisor',
@@ -37,6 +39,7 @@ export const DASHBOARDS: DashboardOption[] = [
     icon: Factory,
     color: 'text-teal-500',
     bgLight: 'bg-teal-500/10 border-teal-500/20 text-teal-600 dark:text-teal-400',
+    demoEmail: 'supervisor@smartops.com',
   },
   {
     id: 'driver',
@@ -48,6 +51,7 @@ export const DASHBOARDS: DashboardOption[] = [
     icon: Truck,
     color: 'text-blue-500',
     bgLight: 'bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400',
+    demoEmail: 'driver@smartops.com',
   },
   {
     id: 'worker',
@@ -59,21 +63,33 @@ export const DASHBOARDS: DashboardOption[] = [
     icon: HardHat,
     color: 'text-emerald-500',
     bgLight: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400',
+    demoEmail: 'worker@smartops.com',
   },
 ];
 
 export const RoleSwitcher: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useOperations();
+  const { user, login } = useOperations();
   const [isOpen, setIsOpen] = useState(false);
+  const [switching, setSwitching] = useState(false);
 
   // Detect current dashboard from path
   const currentDashboard = DASHBOARDS.find((d) => location.pathname.startsWith(d.path)) || DASHBOARDS[0];
   const CurrentIcon = currentDashboard.icon;
 
-  const handleSelect = (option: DashboardOption) => {
+  const handleSelect = async (option: DashboardOption) => {
     setIsOpen(false);
+    if ((user?.role || '').toLowerCase() !== option.role.toLowerCase()) {
+      try {
+        setSwitching(true);
+        await login(option.demoEmail, option.role, 'password123');
+      } catch (err) {
+        console.warn('[RoleSwitcher] Seamless demo switch notice:', err);
+      } finally {
+        setSwitching(false);
+      }
+    }
     navigate(option.path);
   };
 

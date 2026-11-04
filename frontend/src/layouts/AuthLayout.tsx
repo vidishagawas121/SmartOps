@@ -12,9 +12,13 @@ import { useOperations } from '../store/OperationsContext';
 export const AuthLayout: React.FC = () => {
   const { user } = useOperations();
 
-  // If user is already authenticated, redirect to their home node
+  // If user is already authenticated, redirect to their designated dashboard
   if (user) {
-    return <Navigate to={user.role === 'Driver' ? '/driver' : '/owner'} replace />;
+    const role = (user.role || '').toLowerCase();
+    if (role === 'driver') return <Navigate to="/driver" replace />;
+    if (role === 'supervisor') return <Navigate to="/supervisor" replace />;
+    if (role === 'worker') return <Navigate to="/worker" replace />;
+    return <Navigate to="/owner" replace />;
   }
 
   // Render the matched child route directly — no centering wrapper

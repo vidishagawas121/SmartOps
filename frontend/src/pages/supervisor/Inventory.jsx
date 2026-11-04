@@ -332,7 +332,7 @@ const Inventory = ({ searchVal, showToast, onAddClick, onEditClick, onReorderCli
           <button className="btn btn-outline flex items-center gap-2 px-4 py-2 border border-primary/20 hover:bg-primary/5 text-primary text-xs font-semibold rounded-sm transition-colors duration-150" onClick={handleExportCSV}>
             <span className="material-symbols-outlined icon-xs text-primary">download</span>Export CSV
           </button>
-          <button className="btn btn-outline flex items-center gap-2 px-4 py-2 border border-outline-variant hover:bg-surface-low text-on-surface-variant text-xs font-semibold rounded-sm transition-colors duration-150" onClick={() => navigate('/scan')}>
+          <button className="btn btn-outline flex items-center gap-2 px-4 py-2 border border-outline-variant hover:bg-surface-low text-on-surface-variant text-xs font-semibold rounded-sm transition-colors duration-150" onClick={() => navigate('/supervisor/scan')}>
             <span className="material-symbols-outlined icon-xs">qr_code_scanner</span>Scan Item QR
           </button>
           <button className="btn btn-primary flex items-center gap-2 px-4 py-2 bg-primary text-white text-xs font-semibold rounded-sm hover:bg-primary-container transition-colors duration-150" onClick={() => onAddClick()}>

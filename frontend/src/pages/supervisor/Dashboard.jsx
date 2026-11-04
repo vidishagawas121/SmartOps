@@ -298,7 +298,7 @@ const Dashboard = ({ searchVal, showToast, onReorderClick, refreshTrigger }) => 
         </div>
         <div className="flex gap-2.5">
           <button 
-            onClick={() => navigate('/scan')}
+            onClick={() => navigate('/supervisor/scan')}
             className="btn btn-outline flex items-center gap-2 px-4 py-2 border border-outline-variant hover:bg-surface-low text-on-surface-variant text-xs font-semibold rounded-sm transition-all duration-150 active:scale-95 cursor-pointer"
           >
             <span className="material-symbols-outlined icon-xs">qr_code_scanner</span>Scan Item QR
@@ -333,7 +333,7 @@ const Dashboard = ({ searchVal, showToast, onReorderClick, refreshTrigger }) => 
       <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-4">
         {/* Total Workers */}
         <div 
-          onClick={() => navigate('/workers')}
+          onClick={() => navigate('/supervisor/workers')}
           className="bg-surface-lowest border border-outline-variant p-4.5 rounded-md shadow-sm flex flex-col justify-between min-h-[110px] hover:-translate-y-0.5 hover:shadow-md transition-all duration-150 cursor-pointer active:scale-98"
         >
           <div className="flex items-center justify-between mb-3">
@@ -348,7 +348,7 @@ const Dashboard = ({ searchVal, showToast, onReorderClick, refreshTrigger }) => 
 
         {/* Active Tasks */}
         <div 
-          onClick={() => navigate('/tasks')}
+          onClick={() => navigate('/supervisor/tasks')}
           className="bg-surface-lowest border border-outline-variant p-4.5 rounded-md shadow-sm flex flex-col justify-between min-h-[110px] hover:-translate-y-0.5 hover:shadow-md transition-all duration-150 cursor-pointer active:scale-98"
         >
           <div className="flex items-center justify-between mb-3">
@@ -363,7 +363,7 @@ const Dashboard = ({ searchVal, showToast, onReorderClick, refreshTrigger }) => 
 
         {/* Completed Tasks */}
         <div 
-          onClick={() => navigate('/tasks')}
+          onClick={() => navigate('/supervisor/tasks')}
           className="bg-surface-lowest border border-outline-variant p-4.5 rounded-md shadow-sm flex flex-col justify-between min-h-[110px] hover:-translate-y-0.5 hover:shadow-md transition-all duration-150 cursor-pointer active:scale-98"
         >
           <div className="flex items-center justify-between mb-3">
@@ -378,7 +378,7 @@ const Dashboard = ({ searchVal, showToast, onReorderClick, refreshTrigger }) => 
 
         {/* Attendance Today */}
         <div 
-          onClick={() => navigate('/attendance')}
+          onClick={() => navigate('/supervisor/attendance')}
           className="bg-surface-lowest border border-outline-variant p-4.5 rounded-md shadow-sm flex flex-col justify-between min-h-[110px] hover:-translate-y-0.5 hover:shadow-md transition-all duration-150 cursor-pointer active:scale-98"
         >
           <div className="flex items-center justify-between mb-3">
@@ -395,7 +395,7 @@ const Dashboard = ({ searchVal, showToast, onReorderClick, refreshTrigger }) => 
 
         {/* Inventory Summary */}
         <div 
-          onClick={() => navigate('/inventory')}
+          onClick={() => navigate('/supervisor/inventory')}
           className="bg-surface-lowest border border-outline-variant p-4.5 rounded-md shadow-sm flex flex-col justify-between min-h-[110px] hover:-translate-y-0.5 hover:shadow-md transition-all duration-150 cursor-pointer active:scale-98"
         >
           <div className="flex items-center justify-between mb-3">
@@ -410,7 +410,7 @@ const Dashboard = ({ searchVal, showToast, onReorderClick, refreshTrigger }) => 
 
         {/* Low Stock Summary Card */}
         <div 
-          onClick={() => navigate('/alerts', { state: { tab: 'dashboards' } })}
+          onClick={() => navigate('/supervisor/alerts', { state: { tab: 'dashboards' } })}
           className={`p-4.5 rounded-md shadow-sm flex flex-col justify-between min-h-[110px] hover:-translate-y-0.5 hover:shadow-md transition-all duration-150 cursor-pointer active:scale-98 border ${
             lowStockCount > 0 
               ? 'bg-error-container/12 border-error/25' 
@@ -431,7 +431,7 @@ const Dashboard = ({ searchVal, showToast, onReorderClick, refreshTrigger }) => 
 
         {/* Notifications Card */}
         <div 
-          onClick={() => navigate('/settings', { state: { tab: 'notifications' } })}
+          onClick={() => navigate('/supervisor/settings', { state: { tab: 'notifications' } })}
           className={`p-4.5 rounded-md shadow-sm flex flex-col justify-between min-h-[110px] hover:-translate-y-0.5 hover:shadow-md transition-all duration-150 cursor-pointer active:scale-98 border ${
             unreadNotificationsCount > 0 
               ? 'bg-tertiary-container/10 border-tertiary/25' 
@@ -556,7 +556,7 @@ const Dashboard = ({ searchVal, showToast, onReorderClick, refreshTrigger }) => 
           <div className="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
             <h2 className="text-base font-bold text-on-surface">Low Stock Summary</h2>
             <button 
-              onClick={() => navigate('/alerts')}
+              onClick={() => navigate('/supervisor/alerts')}
               className="btn btn-outline btn-sm font-semibold text-primary hover:bg-primary/5 px-2.5 py-1.5 border border-primary/20 rounded-sm text-xs cursor-pointer active:scale-95 transition-all"
             >
               View All Critical →
@@ -675,7 +675,7 @@ const Dashboard = ({ searchVal, showToast, onReorderClick, refreshTrigger }) => 
           <div className="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
             <h2 className="text-base font-bold text-on-surface">Recent Notifications</h2>
             <button 
-              onClick={() => navigate('/settings', { state: { tab: 'notifications' } })}
+              onClick={() => navigate('/supervisor/settings', { state: { tab: 'notifications' } })}
               className="btn btn-outline btn-sm font-semibold text-primary hover:bg-primary/5 px-2.5 py-1.5 border border-primary/20 rounded-sm text-xs cursor-pointer active:scale-95 transition-all"
             >
               View All Logs →
@@ -751,7 +751,7 @@ const Dashboard = ({ searchVal, showToast, onReorderClick, refreshTrigger }) => 
           <div className="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
             <h2 className="text-base font-bold text-on-surface">Active Tasks Checklist</h2>
             <button 
-              onClick={() => navigate('/tasks')}
+              onClick={() => navigate('/supervisor/tasks')}
               className="btn btn-outline btn-sm font-semibold text-primary hover:bg-primary/5 px-2.5 py-1.5 border border-primary/20 rounded-sm text-xs cursor-pointer active:scale-95 transition-all"
             >
               Manage Tasks →
@@ -767,7 +767,7 @@ const Dashboard = ({ searchVal, showToast, onReorderClick, refreshTrigger }) => 
                   return (
                     <div 
                       key={t._id} 
-                      onClick={() => navigate('/tasks')}
+                      onClick={() => navigate('/supervisor/tasks')}
                       className="border border-outline-variant/50 rounded p-3 hover:bg-surface-low cursor-pointer transition-all duration-150 flex flex-col gap-1.5"
                     >
                       <div className="flex justify-between items-start gap-2">

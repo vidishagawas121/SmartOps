@@ -116,7 +116,11 @@ export const Register: React.FC = () => {
 
   const handleGoogleSuccess = (res: any) => {
     if (res.user) {
-      navigate(res.user.role === 'Driver' ? '/driver' : '/owner');
+      const role = (res.user.role || '').toLowerCase();
+      if (role === 'driver') navigate('/driver');
+      else if (role === 'supervisor') navigate('/supervisor');
+      else if (role === 'worker') navigate('/worker');
+      else navigate('/owner');
     }
   };
 
@@ -125,7 +129,13 @@ export const Register: React.FC = () => {
   };
 
   useEffect(() => {
-    if (user) navigate(user.role === 'Driver' ? '/driver' : '/owner');
+    if (user) {
+      const role = (user.role || '').toLowerCase();
+      if (role === 'driver') navigate('/driver');
+      else if (role === 'supervisor') navigate('/supervisor');
+      else if (role === 'worker') navigate('/worker');
+      else navigate('/owner');
+    }
   }, [user, navigate]);
 
   useEffect(() => {

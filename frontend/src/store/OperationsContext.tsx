@@ -17,7 +17,7 @@ interface OperationsContextType {
   notifications: SystemNotification[];
   activities: ActivityItem[];
   refreshDrivers: () => Promise<void>;
-  login: (email: string, role: UserRole, password?: string) => Promise<void>;
+  login: (email: string, role: UserRole, password?: string) => Promise<any>;
   googleAuth: (googleToken: string, role: UserRole) => Promise<any>;
   register: (payload: any) => Promise<{ success?: boolean; message: string; otpCode?: string; token?: string; user?: User }>;
   verifyOTP: (emailOrPayload: string | { email?: string; mobileNumber?: string; channel?: 'email' | 'mobile'; otpCode: string }, code?: string) => Promise<{ message: string; token?: string; user?: User }>;
@@ -305,12 +305,17 @@ export const OperationsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
   }, [user]);
 
-  const login = async (email: string, role: UserRole, password?: string) => {
+  const login = async (email: string, role: UserRole, password?: string): Promise<any> => {
     const res = await api.auth.login(email, role, password);
     setUser(res.user);
-    localStorage.setItem('smartops_user', JSON.stringify(res.user)); if (res.token) { localStorage.setItem('smartops_jwt', res.token); localStorage.setItem('smartops_token', res.token); }
+    localStorage.setItem('smartops_user', JSON.stringify(res.user));
+    if (res.token) {
+      localStorage.setItem('smartops_jwt', res.token);
+      localStorage.setItem('smartops_token', res.token);
+    }
     triggerNotification('System Alert', 'Session Initialized', `Welcome back ${res.user.fullName}! JWT validated.`, 'Info');
     await refreshAllData();
+    return res.user;
   };
 
   const googleAuth = async (_googleToken: string, _role: UserRole) => {
