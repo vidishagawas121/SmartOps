@@ -19,8 +19,15 @@ initSocket(server);
 // Handle server errors (e.g. port already in use)
 server.on('error', (err: any) => {
   if (err.code === 'EADDRINUSE') {
-    console.error(`[SERVER ERROR] Port ${PORT} is already in use. Terminating process to allow clean restart...`);
-    process.exit(1);
+    console.warn(`[SERVER WARNING] Port ${PORT} is temporarily in use. Retrying in 1.5s...`);
+    setTimeout(() => {
+      try {
+        server.close();
+      } catch (_) {}
+      server.listen(PORT, () => {
+        console.log(`SmartOps Express Server listening on port ${PORT}`);
+      });
+    }, 1500);
   } else {
     console.error('[SERVER ERROR] Unhandled HTTP server error:', err);
   }
