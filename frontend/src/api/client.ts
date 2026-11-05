@@ -848,6 +848,18 @@ export const api = {
       }
     },
   },
+
+  updateProfile: async (payload: {
+    fullName?: string;
+    email?: string;
+    mobileNumber?: string;
+    companyName?: string;
+    licenseNumber?: string;
+    vehicleNumber?: string;
+    avatarUrl?: string;
+  }): Promise<{ success: boolean; message: string; user: User; token?: string }> => {
+    return api.auth.updateProfile(payload);
+  },
 };
 
 

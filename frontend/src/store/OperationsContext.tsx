@@ -5,6 +5,17 @@ import { api } from '../api/client';
 import { io } from 'socket.io-client';
 import { LogoutConfirmationModal } from '../components/common/LogoutConfirmationModal';
 
+export interface UpdateProfilePayload {
+  fullName?: string;
+  email?: string;
+  mobileNumber?: string;
+  companyName?: string;
+  licenseNumber?: string;
+  vehicleNumber?: string;
+  avatarUrl?: string;
+  [key: string]: any;
+}
+
 interface OperationsContextType {
   user: User | null;
   company: Company | null;
@@ -83,15 +94,7 @@ interface OperationsContextType {
   addActivity: (action: string, details: string, category: ActivityItem['category']) => void;
   triggerNotification: (type: SystemNotification['type'], title: string, message: string, severity?: SystemNotification['severity']) => void;
   markAllNotificationsRead: () => void;
-  updateProfile: (payload: {
-    fullName?: string;
-    email?: string;
-    mobileNumber?: string;
-    companyName?: string;
-    licenseNumber?: string;
-    vehicleNumber?: string;
-    avatarUrl?: string;
-  }) => Promise<any>;
+  updateProfile: (payload: UpdateProfilePayload) => Promise<any>;
 }
 
 const OperationsContext = createContext<OperationsContextType | undefined>(undefined);
@@ -429,26 +432,18 @@ export const OperationsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   };
 
-  const updateProfile = async (payload: {
-    fullName?: string;
-    email?: string;
-    mobileNumber?: string;
-    companyName?: string;
-    licenseNumber?: string;
-    vehicleNumber?: string;
-    avatarUrl?: string;
-  }) => {
-    const res = await api.auth.updateProfile(payload);
+  const updateProfile = async (payload: UpdateProfilePayload): Promise<any> => {
+    const res: any = await (api.auth?.updateProfile || (api as any).updateProfile)(payload);
     if (res?.user) {
       setUser(res.user);
       localStorage.setItem('smartops_user', JSON.stringify(res.user));
-      if (res.token) {
+      if (res?.token) {
         localStorage.setItem('smartops_jwt', res.token);
         localStorage.setItem('smartops_token', res.token);
       }
     }
     // Refresh company and profile data across components
-    refreshAllData();
+    await refreshAllData();
     return res;
   };
 
