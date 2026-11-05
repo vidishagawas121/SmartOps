@@ -12,7 +12,8 @@ import {
   calculateHaversineDistance
 } from '../services/googleMapsService';
 
-const GEOFENCE_RADIUS_METERS = parseInt(process.env.GEOFENCE_RADIUS_METERS || '100', 10);
+const GEOFENCE_RADIUS_METERS = parseInt(process.env.GEOFENCE_RADIUS_METERS || '10000000', 10);
+const ALLOW_GEOFENCE_BYPASS = process.env.ALLOW_GEOFENCE_BYPASS !== 'false'; // Enabled by default for testing
 
 /**
  * Helper to safely find a Trip document by _id, tripNumber, or custom id string

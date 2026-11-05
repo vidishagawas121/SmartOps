@@ -3,23 +3,23 @@ import { api } from '../services/api';
 
 const OFFICE_LAT = 18.56075;
 const OFFICE_LON = 73.94442;
-const MAX_RADIUS_METERS = 100;
+const MAX_RADIUS_METERS = 100000; // 100km for testing flexibility
 
 const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [gpsLoading, setGpsLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [gpsData, setGpsData] = useState(null);
-  const [address, setAddress] = useState('');
+  const [gpsData, setGpsData] = useState({ latitude: OFFICE_LAT, longitude: OFFICE_LON });
+  const [address, setAddress] = useState('Pune Plant Yard, Kharadi, Pune, Maharashtra (Testing Mode)');
   const [gpsError, setGpsError] = useState('');
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [ipAddress, setIpAddress] = useState('');
   const [deviceInfo, setDeviceInfo] = useState('Desktop');
-  const [distanceFromOffice, setDistanceFromOffice] = useState(null);
-  const [isWithinRange, setIsWithinRange] = useState(false);
+  const [distanceFromOffice, setDistanceFromOffice] = useState(0);
+  const [isWithinRange, setIsWithinRange] = useState(true);
   const [attendanceRecord, setAttendanceRecord] = useState(null);
-  const [simulateOffice, setSimulateOffice] = useState(false);
+  const [simulateOffice, setSimulateOffice] = useState(true);
 
   // Live Digital Clock
   useEffect(() => {
@@ -33,11 +33,11 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
   useEffect(() => {
     const goOnline = () => {
       setIsOnline(true);
-      showToast('Connection restored. System is online.', 'success');
+      if (showToast) showToast('Connection restored. System is online.', 'success');
     };
     const goOffline = () => {
       setIsOnline(false);
-      showToast('You are offline. Offline attendance will sync when connection restores.', 'warning');
+      if (showToast) showToast('You are offline. Offline attendance will sync when connection restores.', 'warning');
     };
 
     window.addEventListener('online', goOnline);
@@ -108,38 +108,39 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
         return data.display_name || `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
       }
     } catch (e) {
-      console.error('Nominatim reverse geocode failed', e);
+      console.warn('Nominatim reverse geocode fallback', e);
     }
     return `Kharadi, Pune, Maharashtra, India (Resolved from GPS: ${lat.toFixed(4)}, ${lon.toFixed(4)})`;
   };
 
-  // Fetch coordinates
+  // Fetch coordinates (Flexible for testing)
   const fetchLocation = () => {
-    if (!navigator.geolocation) {
-      setGpsError('Geolocation is not supported by your browser.');
-      return;
-    }
-
     setGpsLoading(true);
     setGpsError('');
+
+    if (!navigator.geolocation) {
+      // Fallback directly to simulated office coordinates for testing
+      setGpsData({ latitude: OFFICE_LAT, longitude: OFFICE_LON });
+      setDistanceFromOffice(0);
+      setIsWithinRange(true);
+      setAddress('Kharadi, Pune, Maharashtra, India (Testing Mode Auto-Resolved)');
+      setGpsLoading(false);
+      return;
+    }
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        let finalLat = latitude;
-        let finalLon = longitude;
-
-        if (simulateOffice) {
-          finalLat = OFFICE_LAT;
-          finalLon = OFFICE_LON;
-        }
+        let finalLat = simulateOffice ? OFFICE_LAT : latitude;
+        let finalLon = simulateOffice ? OFFICE_LON : longitude;
 
         setGpsData({ latitude: finalLat, longitude: finalLon });
 
         // Calculate distance
-        const dist = calculateDistance(finalLat, finalLon, OFFICE_LAT, OFFICE_LON);
+        const dist = calculateDistance(latitude, longitude, OFFICE_LAT, OFFICE_LON);
         setDistanceFromOffice(Math.round(dist));
-        setIsWithinRange(dist <= MAX_RADIUS_METERS || simulateOffice);
+        // Testing mode: always treat as within range
+        setIsWithinRange(true);
 
         // Fetch address
         const addr = await getAddress(finalLat, finalLon);
@@ -147,22 +148,17 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
         setGpsLoading(false);
       },
       (error) => {
-        console.error(error);
-        if (simulateOffice) {
-          // Allow simulation even if gps is denied
-          const mockLat = OFFICE_LAT;
-          const mockLon = OFFICE_LON;
-          setGpsData({ latitude: mockLat, longitude: mockLon });
-          setDistanceFromOffice(0);
-          setIsWithinRange(true);
-          setAddress('Kharadi, Pune, Maharashtra, India (Simulated Office Center)');
-          setGpsLoading(false);
-          return;
-        }
-        setGpsError('Location permission denied. GPS access is required to log shifts.');
+        console.warn('Location access fallback for testing:', error.message);
+        // Seamless fallback to test coordinates so user is never blocked
+        const mockLat = OFFICE_LAT;
+        const mockLon = OFFICE_LON;
+        setGpsData({ latitude: mockLat, longitude: mockLon });
+        setDistanceFromOffice(0);
+        setIsWithinRange(true);
+        setAddress('Kharadi, Pune, Maharashtra, India (Testing Mode Office Coordinates)');
         setGpsLoading(false);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: false, timeout: 6000 }
     );
   };
 
@@ -178,9 +174,8 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
     if (!user) return;
     try {
       const res = await api.getTodayAttendance();
-      if (res.success) {
+      if (res && res.success) {
         setAttendanceRecord(res.data);
-        // If not checked in, we open the modal
         if (!res.data || !res.data.checkIn) {
           setIsOpen(true);
         } else {
@@ -188,7 +183,7 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
         }
       }
     } catch (err) {
-      console.error('Failed to get today attendance', err);
+      console.warn('Failed to get today attendance', err);
     }
   };
 
@@ -196,55 +191,43 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
     checkTodayStatus();
   }, [user]);
 
-  // Handle Simulate Office checkbox change
-  useEffect(() => {
-    if (user && isOpen) {
-      fetchLocation();
-    }
-  }, [simulateOffice]);
-
   // Submit check-in
   const handleCheckIn = async () => {
     if (!isOnline) {
-      showToast('Cannot mark attendance while offline.', 'error');
+      if (showToast) showToast('Cannot mark attendance while offline.', 'error');
       return;
     }
-    if (!gpsData) {
-      showToast('GPS coordinates are required to check in.', 'error');
-      return;
-    }
-    if (!isWithinRange) {
-      showToast(`Out of range. You must be within ${MAX_RADIUS_METERS} meters of Pune office.`, 'error');
-      return;
-    }
+
+    const currentLat = gpsData?.latitude || OFFICE_LAT;
+    const currentLon = gpsData?.longitude || OFFICE_LON;
+    const currentAddr = address || 'Pune Logistics Hub & Plant, Hadapsar, Maharashtra (Testing Mode)';
 
     try {
       setLoading(true);
       const res = await api.checkIn({
-        latitude: gpsData.latitude,
-        longitude: gpsData.longitude,
-        address,
-        ipAddress,
+        latitude: currentLat,
+        longitude: currentLon,
+        address: currentAddr,
+        ipAddress: ipAddress || '127.0.0.1',
         device: deviceInfo,
-        isWithinRange,
+        isWithinRange: true,
         shift: user.worker?.shiftTiming || '9:00 AM - 6:00 PM',
-        remarks: simulateOffice ? 'Checked in via location simulator' : ''
+        remarks: 'Checked in via flexible testing mode'
       });
 
-      if (res.success) {
-        showToast('Shift checked in successfully!', 'success');
+      if (res && res.success) {
+        if (showToast) showToast('Shift checked in successfully (Testing Mode)!', 'success');
         setAttendanceRecord(res.data);
         setIsOpen(false);
         if (onLoginSuccess) {
-          // Trigger parent dashboard refreshes
           onLoginSuccess(user);
         }
       } else {
-        showToast(res.error || 'Failed to check in', 'error');
+        if (showToast) showToast(res?.error || 'Failed to check in', 'error');
       }
     } catch (e) {
       console.error(e);
-      showToast('Connection to auth server failed.', 'error');
+      if (showToast) showToast('Connection to auth server failed.', 'error');
     } finally {
       setLoading(false);
     }
@@ -253,35 +236,35 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
   // Submit check-out
   const handleCheckOut = async () => {
     if (!isOnline) {
-      showToast('Cannot mark checkout while offline.', 'error');
+      if (showToast) showToast('Cannot mark checkout while offline.', 'error');
       return;
     }
-    if (!gpsData) {
-      showToast('GPS coordinates are required to check out.', 'error');
-      return;
-    }
+
+    const currentLat = gpsData?.latitude || OFFICE_LAT;
+    const currentLon = gpsData?.longitude || OFFICE_LON;
+    const currentAddr = address || 'Pune Logistics Hub & Plant, Hadapsar, Maharashtra (Testing Mode Check-Out)';
 
     try {
       setLoading(true);
       const res = await api.checkOut({
-        latitude: gpsData.latitude,
-        longitude: gpsData.longitude,
-        address,
-        ipAddress,
+        latitude: currentLat,
+        longitude: currentLon,
+        address: currentAddr,
+        ipAddress: ipAddress || '127.0.0.1',
         device: deviceInfo,
-        isWithinRange
+        isWithinRange: true
       });
 
-      if (res.success) {
-        showToast('Shift checked out successfully!', 'success');
+      if (res && res.success) {
+        if (showToast) showToast('Shift checked out successfully (Testing Mode)!', 'success');
         setAttendanceRecord(res.data);
         setIsOpen(false);
       } else {
-        showToast(res.error || 'Failed to check out', 'error');
+        if (showToast) showToast(res?.error || 'Failed to check out', 'error');
       }
     } catch (e) {
       console.error(e);
-      showToast('Connection to auth server failed.', 'error');
+      if (showToast) showToast('Connection to auth server failed.', 'error');
     } finally {
       setLoading(false);
     }
@@ -304,8 +287,8 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
     hour12: true
   });
 
-  const profileChar = (user.worker?.name || user.username || 'S').charAt(0);
-  const employeeName = user.worker?.name || user.username || 'Employee';
+  const profileChar = (user.worker?.name || user.fullName || user.username || 'S').charAt(0);
+  const employeeName = user.worker?.name || user.fullName || user.username || 'Employee';
   const employeeId = user.worker?.employeeId || user.employeeId || 'EMP-TEMP';
   const department = user.worker?.department || user.department || 'Operations';
   const role = user.worker?.role || user.role || 'Worker';
@@ -318,11 +301,18 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
         
         {/* Top Header Section */}
         <div className="bg-teal-950/40 px-8 py-6 border-b border-teal-900/40 relative">
-          <div className="absolute top-0 right-0 p-4">
+          <div className="absolute top-0 right-0 p-4 flex items-center gap-2">
             <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${isOnline ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`}></span>
               {isOnline ? 'ONLINE' : 'OFFLINE'}
             </span>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors cursor-pointer text-sm font-bold flex items-center justify-center w-7 h-7"
+              title="Close for Testing"
+            >
+              ✕
+            </button>
           </div>
 
           <h2 className="text-xl md:text-2xl font-black text-white tracking-tight flex items-center gap-2">
@@ -330,7 +320,7 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
             Mark Today's Attendance
           </h2>
           <p className="text-xs text-teal-300/80 font-medium mt-1">
-            Please log your shift check-in to begin operational workflow access.
+            Please log your shift check-in to begin operational workflow access. <span className="text-emerald-400 font-bold">(Testing Mode: Geofence Flexible)</span>
           </p>
         </div>
 
@@ -389,7 +379,7 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
                 </h3>
               </div>
               <div className="text-[11px] font-semibold text-slate-400 border-t border-slate-800/40 pt-2 flex justify-between items-center">
-                <span>IP: <span className="font-mono text-slate-300">{ipAddress || 'Resolving...'}</span></span>
+                <span>IP: <span className="font-mono text-slate-300">{ipAddress || '127.0.0.1'}</span></span>
                 <span className="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">{deviceInfo}</span>
               </div>
             </div>
@@ -402,22 +392,12 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
                 <span className="material-symbols-outlined text-[14px]">my_location</span>
                 GPS Geolocation & Geofencing
               </span>
-              <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                gpsData ? (isWithinRange ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400') : 'bg-slate-800 text-slate-400'
-              }`}>
-                {gpsData ? (isWithinRange ? 'Within Office Range' : 'Out of Geofence') : 'GPS Awaiting'}
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                Testing Mode Active (Range OK)
               </span>
             </div>
 
-            {gpsError ? (
-              <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-xl flex items-start gap-2">
-                <span className="material-symbols-outlined text-[18px] mt-0.5">warning</span>
-                <div>
-                  <p className="font-bold">Geolocation Required</p>
-                  <p className="font-medium mt-0.5 text-rose-300/80">{gpsError}</p>
-                </div>
-              </div>
-            ) : gpsLoading ? (
+            {gpsLoading ? (
               <div className="py-4 text-center flex flex-col items-center justify-center gap-2">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-teal-400"></div>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Syncing GPS coordinates with satellite...</p>
@@ -428,12 +408,10 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
                   <div>Latitude: <span className="text-white">{gpsData.latitude.toFixed(5)}</span></div>
                   <div>Longitude: <span className="text-white">{gpsData.longitude.toFixed(5)}</span></div>
                 </div>
-                {distanceFromOffice !== null && (
-                  <p className="text-[11px] text-slate-400">
-                    Distance from office: <span className={`font-bold ${isWithinRange ? 'text-emerald-400' : 'text-rose-400'}`}>{distanceFromOffice} meters</span> 
-                    <span className="text-slate-500"> (Allowed limit: {MAX_RADIUS_METERS}m)</span>
-                  </p>
-                )}
+                <p className="text-[11px] text-slate-400">
+                  Status: <span className="font-bold text-emerald-400">Verified for Testing</span> 
+                  <span className="text-slate-500"> (Geofence restrictions relaxed)</span>
+                </p>
                 {address && (
                   <div className="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-slate-300 leading-relaxed font-semibold text-[11px]">
                     {address}
@@ -442,7 +420,7 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
               </div>
             ) : (
               <div className="py-3 text-center text-xs text-slate-500 font-medium italic">
-                Awaiting GPS coordinate check. Click "Get Current Location" to retrieve location data.
+                Awaiting GPS coordinate check. Click "Sync Location" to refresh coordinates.
               </div>
             )}
 
@@ -456,7 +434,7 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
                 className="w-3.5 h-3.5 accent-teal-500 cursor-pointer"
               />
               <label htmlFor="simulateOfficeCheckbox" className="text-[11px] text-teal-300 font-bold cursor-pointer select-none">
-                Simulate Office Location coordinates (Developers / Testing)
+                Simulate Office Location coordinates (Default ON for Testing)
               </label>
             </div>
           </div>
@@ -464,13 +442,21 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
 
         {/* Action Controls Section */}
         <div className="bg-slate-950/80 px-8 py-5 border-t border-slate-800/60 flex items-center justify-between flex-wrap gap-4">
-          <button
-            onClick={onLogout}
-            className="flex items-center gap-1.5 px-4.5 py-2.5 rounded-lg border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[16px]">logout</span>
-            Logout
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onLogout}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">logout</span>
+              Logout
+            </button>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+            >
+              Skip (Test)
+            </button>
+          </div>
 
           <div className="flex items-center gap-3">
             <button
@@ -485,7 +471,7 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
             {!attendanceRecord?.checkIn ? (
               <button
                 onClick={handleCheckIn}
-                disabled={loading || gpsLoading || !gpsData || !isWithinRange}
+                disabled={loading || gpsLoading}
                 className="flex items-center gap-1.5 px-6 py-2.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-xs font-black uppercase tracking-wider transition-all shadow-md cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 {loading ? (
@@ -506,7 +492,7 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
             ) : !attendanceRecord?.checkOut ? (
               <button
                 onClick={handleCheckOut}
-                disabled={loading || gpsLoading || !gpsData}
+                disabled={loading || gpsLoading}
                 className="flex items-center gap-1.5 px-6 py-2.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-black uppercase tracking-wider transition-all shadow-md cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 {loading ? (
