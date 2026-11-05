@@ -6,6 +6,8 @@
     "src/**/*.test.ts",
     ".mongo_data",
     ".mongo_data/**",
+    ".mongo-dev-data",
+    ".mongo-dev-data/**",
     "dist/**"
   ]
 }

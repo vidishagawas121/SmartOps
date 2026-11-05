@@ -564,6 +564,78 @@ const seedDefaultAccounts = async () => {
   }
 };
 
+/**
+ * Automatically spawns the installed local MongoDB binary with dbpath on D: drive
+ * (to avoid running out of disk space on C: drive).
+ */
+const startLocalMongodDaemon = async (): Promise<boolean> => {
+  const fs = require('fs');
+  const path = require('path');
+  const { spawn } = require('child_process');
+  const net = require('net');
+
+  const candidateBinaries = [
+    process.env.MONGOD_BIN,
+    'C:/Program Files/MongoDB/Server/8.3/bin/mongod.exe',
+    'C:/Program Files/MongoDB/Server/8.0/bin/mongod.exe',
+    'C:/Program Files/MongoDB/Server/7.0/bin/mongod.exe',
+    'C:/Program Files/MongoDB/Server/6.0/bin/mongod.exe'
+  ].filter(Boolean);
+
+  let binaryPath: string | null = null;
+  for (const b of candidateBinaries) {
+    if (b && fs.existsSync(b)) {
+      binaryPath = b;
+      break;
+    }
+  }
+
+  if (!binaryPath) return false;
+
+  // Use D: drive workspace data directory (which has 150+ GB free space)
+  const devDbPath = path.resolve(process.cwd(), '.mongo-dev-data');
+  if (!fs.existsSync(devDbPath)) {
+    fs.mkdirSync(devDbPath, { recursive: true });
+  }
+
+  console.log(`[DB] Launching installed MongoDB daemon from: ${binaryPath}`);
+  console.log(`[DB] Storage path on D: drive: ${devDbPath}`);
+
+  try {
+    const child = spawn(binaryPath, [
+      '--dbpath', devDbPath,
+      '--port', '27017',
+      '--bind_ip', '127.0.0.1',
+      '--setParameter', 'diagnosticDataCollectionEnabled=false'
+    ], {
+      detached: true,
+      stdio: 'ignore'
+    });
+    child.unref();
+
+    // Poll port 27017 for up to 15 seconds
+    for (let i = 0; i < 30; i++) {
+      await new Promise(res => setTimeout(res, 500));
+      const isOpen = await new Promise<boolean>(resolve => {
+        const sock = new net.Socket();
+        sock.setTimeout(400);
+        sock.once('connect', () => { sock.destroy(); resolve(true); });
+        sock.once('error', () => { sock.destroy(); resolve(false); });
+        sock.once('timeout', () => { sock.destroy(); resolve(false); });
+        sock.connect(27017, '127.0.0.1');
+      });
+      if (isOpen) {
+        console.log('[DB] Local MongoDB daemon is ready and listening on port 27017.');
+        return true;
+      }
+    }
+  } catch (err: any) {
+    console.warn(`[DB] Failed to launch local mongod process: ${err?.message}`);
+  }
+
+  return false;
+};
+
 export const connectDB = async () => {
   const primaryUri = process.env.MONGO_URI || 'mongodb://localhost:27017/smartops';
 
@@ -594,31 +666,32 @@ export const connectDB = async () => {
     console.warn(`[DB] Primary MongoDB unreachable: ${primaryErr.message}`);
   }
 
-  // ── Attempt 2: Local MongoDB fallback (localhost:27017) ────────────────────
-  // This runs when Atlas is unavailable (e.g., IP not whitelisted in Atlas Network Access).
-  // Install MongoDB Community Edition locally if this also fails:
-  // https://www.mongodb.com/try/download/community
-  const localUri = 'mongodb://localhost:27017/smartops';
-  if (primaryUri !== localUri) {
-    try {
-      console.log('[DB] Falling back to local MongoDB at mongodb://localhost:27017/smartops ...');
-      const conn = await mongoose.connect(localUri, {
-        serverSelectionTimeoutMS: 4000
+  // ── Attempt 2: Auto-start installed local MongoDB binary on D: drive ─────────
+  try {
+    const started = await startLocalMongodDaemon();
+    if (started) {
+      const conn = await mongoose.connect('mongodb://localhost:27017/smartops', {
+        serverSelectionTimeoutMS: 5000
       });
-      console.log(`[DB] Connected to local MongoDB: ${conn.connection.host}`);
+      console.log(`[DB] Connected successfully to auto-started local MongoDB: ${conn.connection.host}`);
       await seedDefaultAccounts();
       return;
-    } catch (localErr: any) {
-      console.warn(`[DB] Local MongoDB also unavailable: ${localErr.message}`);
     }
+  } catch (startErr: any) {
+    console.warn(`[DB] Auto-starting local MongoDB failed: ${startErr.message}`);
   }
 
-  // ── Attempt 3: In-Memory MongoDB Fallback for Dev ──────────────────────────
+  // ── Attempt 3: In-Memory MongoDB Fallback for Dev (configured on D: drive) ───
   try {
     console.log('[DB] Falling back to In-Memory MongoMemoryServer for development...');
     const { MongoMemoryServer } = require('mongodb-memory-server');
     const path = require('path');
     const fs = require('fs');
+
+    const devDbPath = path.resolve(process.cwd(), '.mongo-dev-data');
+    if (!fs.existsSync(devDbPath)) {
+      fs.mkdirSync(devDbPath, { recursive: true });
+    }
 
     const candidatePaths = [
       process.env.MONGOMS_SYSTEM_BINARY,
@@ -638,7 +711,9 @@ export const connectDB = async () => {
 
     const opts: any = {
       instance: {
-        launchTimeout: 60000
+        dbPath: devDbPath,
+        launchTimeout: 30000,
+        args: ['--setParameter', 'diagnosticDataCollectionEnabled=false']
       }
     };
     if (systemBinary) {

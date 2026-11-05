@@ -48,3 +48,6 @@ coverage/
 .cache/
 */.cache/
 .eslintcache
+.mongo-dev-data/
+data/
+
