@@ -30,6 +30,7 @@ const ResetPassword = lazy(() => import('./pages/auth/ResetPassword').then(m => 
 // Owner Pages (Lazy Loaded)
 const OwnerDashboard = lazy(() => import('./pages/owner/Dashboard').then(m => ({ default: m.Dashboard })));
 const OwnerOperations = lazy(() => import('./pages/owner/Operations').then(m => ({ default: m.Operations })));
+const OwnerFactoryFloor = lazy(() => import('./pages/owner/FactoryFloor').then(m => ({ default: m.FactoryFloor })));
 const OwnerInventory = lazy(() => import('./pages/owner/Inventory').then(m => ({ default: m.Inventory })));
 const OwnerAttendance = lazy(() => import('./pages/owner/Attendance').then(m => ({ default: m.Attendance })));
 const OwnerFleet = lazy(() => import('./pages/owner/Fleet').then(m => ({ default: m.Fleet })));
@@ -130,6 +131,8 @@ const App: React.FC = () => {
                   <Route element={<DashboardLayout />}>
                     <Route index element={<OwnerDashboard />} />
                     <Route path="operations" element={<OwnerOperations />} />
+                    <Route path="factory" element={<OwnerFactoryFloor />} />
+                    <Route path="factory-floor" element={<OwnerFactoryFloor />} />
                     <Route path="trips" element={<OwnerTrips />} />
                     <Route path="inventory" element={<OwnerInventory />} />
                     <Route path="attendance" element={<OwnerAttendance />} />

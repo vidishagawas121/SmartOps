@@ -134,7 +134,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed })
           { name: 'Inventory Logs', path: '/owner/inventory', icon: Warehouse },
           { name: 'Payroll & Salary', path: '/owner/payroll', icon: CreditCard },
           { name: 'Reports Desk', path: '/owner/reports', icon: FileText },
-          { name: 'Factory Floor Console', path: '/supervisor', icon: Factory },
+          { name: 'Factory Floor Console', path: '/owner/factory', icon: Factory },
         ],
       },
       {
