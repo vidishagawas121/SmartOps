@@ -1,4 +1,5 @@
 const reportService = require('../services/reportService');
+const mongoose = require('mongoose');
 
 class ReportController {
   async getAllReports(req, res, next) {
@@ -12,6 +13,9 @@ class ReportController {
 
   async getReportById(req, res, next) {
     try {
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        return next();
+      }
       const report = await reportService.getReportById(req.params.id);
       res.status(200).json({ success: true, data: report });
     } catch (err) {
@@ -30,6 +34,9 @@ class ReportController {
 
   async deleteReport(req, res, next) {
     try {
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        return next();
+      }
       await reportService.deleteReport(req.params.id);
       res.status(200).json({ success: true, data: {} });
     } catch (err) {

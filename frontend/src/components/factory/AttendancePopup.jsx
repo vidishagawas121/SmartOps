@@ -211,7 +211,7 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
         ipAddress: ipAddress || '127.0.0.1',
         device: deviceInfo,
         isWithinRange: true,
-        shift: user.worker?.shiftTiming || '9:00 AM - 6:00 PM',
+        shift: user?.worker?.shiftTiming || '9:00 AM - 6:00 PM',
         remarks: 'Checked in via flexible testing mode'
       });
 
@@ -223,7 +223,7 @@ const AttendancePopup = ({ user, onLoginSuccess, showToast, onLogout }) => {
           onLoginSuccess(user);
         }
       } else {
-        if (showToast) showToast(res?.error || 'Failed to check in', 'error');
+        if (showToast) showToast(res?.error || res?.message || 'Failed to check in', 'error');
       }
     } catch (e) {
       console.error(e);

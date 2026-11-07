@@ -1,4 +1,5 @@
 const inventoryService = require('../services/inventoryService');
+const mongoose = require('mongoose');
 
 class InventoryController {
   async getAllItems(req, res, next) {
@@ -12,6 +13,9 @@ class InventoryController {
 
   async getItemById(req, res, next) {
     try {
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        return next();
+      }
       const item = await inventoryService.getItemById(req.params.id);
       res.status(200).json({ success: true, data: item });
     } catch (err) {
@@ -30,6 +34,9 @@ class InventoryController {
 
   async updateItem(req, res, next) {
     try {
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        return next();
+      }
       const item = await inventoryService.updateItem(req.params.id, req.body);
       res.status(200).json({ success: true, data: item });
     } catch (err) {
@@ -39,6 +46,9 @@ class InventoryController {
 
   async deleteItem(req, res, next) {
     try {
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        return next();
+      }
       await inventoryService.deleteItem(req.params.id);
       res.status(200).json({ success: true, data: {} });
     } catch (err) {

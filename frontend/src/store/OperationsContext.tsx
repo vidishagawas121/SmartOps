@@ -124,13 +124,14 @@ export const OperationsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       return;
     }
     try {
+      const isOwner = user.role === 'Owner';
       const [invData, attData, salData, fltData, trpData, drvData] = await Promise.allSettled([
         api.inventory.getAll(),
         api.attendance.getAll(),
         api.salary.getAll(),
         api.fleet.getAll(),
         api.trips.getAll(),
-        api.drivers.getAll({ limit: 100 })
+        isOwner ? api.drivers.getAll({ limit: 100 }) : Promise.resolve({ data: [] } as any)
       ]);
 
       if (invData.status === 'fulfilled') setInventory(invData.value || []);
@@ -142,6 +143,8 @@ export const OperationsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         const dVal = drvData.value;
         const dList = Array.isArray(dVal?.data) ? dVal.data : (Array.isArray(dVal) ? dVal : []);
         setDrivers(dList);
+      } else {
+        setDrivers([]);
       }
 
       if (user.role === 'Owner') {
@@ -321,16 +324,22 @@ export const OperationsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return res.user;
   };
 
-  const googleAuth = async (_googleToken: string, _role: UserRole) => {
-    throw new Error('Google authentication is temporarily disabled.');
-    /*
-    // TEMPORARILY DISABLED GOOGLE OAUTH CONTEXT HANDLER
-    const res = await api.auth.googleAuth(_googleToken, _role);
+  const googleAuth = async (googleToken: string, role: UserRole) => {
+    const res = await api.auth.googleAuth(googleToken, role);
     setUser(res.user);
-    localStorage.setItem('smartops_user', JSON.stringify(res.user)); if (res.token) { localStorage.setItem('smartops_jwt', res.token); localStorage.setItem('smartops_token', res.token); }
-    triggerNotification('System Alert', 'Google Session Initialized', `Welcome ${res.user.fullName}! Google OAuth authenticated.`, 'Info');
+    localStorage.setItem('smartops_user', JSON.stringify(res.user));
+    if (res.token) {
+      localStorage.setItem('smartops_jwt', res.token);
+      localStorage.setItem('smartops_token', res.token);
+    }
+    triggerNotification(
+      'System Alert',
+      'Google Session Initialized',
+      `Welcome ${res.user.fullName || res.user.name || 'User'}! Google OAuth authenticated.`,
+      'Info'
+    );
+    await refreshAllData();
     return res;
-    */
   };
 
   const register = async (payload: any) => {

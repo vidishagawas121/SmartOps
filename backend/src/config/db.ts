@@ -1,3 +1,6 @@
+import dns from 'dns';
+dns.setServers(['1.1.1.1', '8.8.8.8']);
+
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import User from '../models/User';
@@ -5,7 +8,6 @@ import Product from '../models/Product';
 import Inventory from '../models/Inventory';
 import Company, { generateCompanyId } from '../models/Company';
 import { seedCompanyData } from '../services/seedService';
-
 
 const seedDefaultInventory = async () => {
   try {

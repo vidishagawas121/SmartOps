@@ -2,6 +2,7 @@ const Attendance = require('../models/Attendance');
 const Notification = require('../models/Notification');
 const Worker = require('../models/Worker');
 const salaryService = require('./salaryService');
+const mongoose = require('mongoose');
 
 class AttendanceService {
   async getBranchForUser(requestingUser) {
@@ -89,8 +90,16 @@ class AttendanceService {
     return await Attendance.find(query).populate('worker').sort({ date: -1 });
   }
 
-  async getMyAttendance(workerId, queryParams) {
-    let query = { worker: workerId };
+  async getMyAttendance(workerId, queryParams, userId) {
+    let query = {};
+    const conditions = [];
+    if (workerId && mongoose.isValidObjectId(workerId)) conditions.push({ worker: workerId });
+    if (userId && mongoose.isValidObjectId(userId)) conditions.push({ user: userId });
+    if (conditions.length > 1) {
+      query.$or = conditions;
+    } else if (conditions.length === 1) {
+      query = conditions[0];
+    }
     return await Attendance.find(query).populate('worker').sort({ date: -1 });
   }
 
@@ -181,28 +190,61 @@ class AttendanceService {
     return true;
   }
 
-  async checkIn(workerId, userId, details) {
+  async checkIn(workerId, userId, details = {}) {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
 
-    const workerObj = await Worker.findById(workerId);
-    if (!workerObj) {
-      const error = new Error('Worker profile not found');
-      error.statusCode = 404;
-      throw error;
+    let workerObj = null;
+    if (workerId && mongoose.isValidObjectId(workerId)) {
+      workerObj = await Worker.findById(workerId);
+    }
+    if (!workerObj && userId && mongoose.isValidObjectId(userId)) {
+      workerObj = await Worker.findOne({ user: userId });
+    }
+    if (!workerObj && workerId && mongoose.isValidObjectId(workerId)) {
+      workerObj = await Worker.findOne({ user: workerId });
     }
 
+    if (!workerObj) {
+      const UserModel = mongoose.models.User || require('../models/User');
+      let userDoc = null;
+      if (userId && mongoose.isValidObjectId(userId)) {
+        userDoc = await UserModel.findById(userId).catch(() => null);
+      }
+      workerObj = await Worker.create({
+        name: userDoc?.fullName || userDoc?.name || details.employeeName || 'Worker',
+        email: userDoc?.email || `worker_${Date.now()}@smartops.local`,
+        employeeId: userDoc?.employeeId || `EMP-${Date.now().toString().slice(-4)}`,
+        department: userDoc?.department || 'Operations',
+        designation: userDoc?.role === 'Supervisor' ? 'Floor Supervisor' : 'Floor Operator',
+        role: userDoc?.role || 'Worker',
+        salary: userDoc?.role === 'Supervisor' ? 45000 : 25000,
+        status: 'Active',
+        assignedSite: userDoc?.branch || 'Pune Head Office',
+        branch: userDoc?.branch || 'Pune Head Office',
+        user: userId && mongoose.isValidObjectId(userId) ? userId : undefined
+      });
+      if (userDoc) {
+        userDoc.worker = workerObj._id;
+        await userDoc.save().catch(() => {});
+      }
+    }
+
+    workerId = workerObj._id;
+
+    const existingConditions = [];
+    if (workerId && mongoose.isValidObjectId(workerId)) existingConditions.push({ worker: workerId });
+    if (userId && mongoose.isValidObjectId(userId)) existingConditions.push({ user: userId });
+
     const existing = await Attendance.findOne({
-      worker: workerId,
+      ...(existingConditions.length > 1 ? { $or: existingConditions } : (existingConditions[0] || {})),
       date: { $gte: todayStart, $lte: todayEnd }
     });
 
     if (existing) {
-      const error = new Error('You have already checked in today.');
-      error.statusCode = 400;
-      throw error;
+      return await Attendance.findById(existing._id).populate('worker');
     }
 
     const shift = details.shift || workerObj.shiftTiming || '9:00 AM - 6:00 PM';
@@ -299,14 +341,29 @@ class AttendanceService {
     return await Attendance.findById(record._id).populate('worker');
   }
 
-  async checkOut(workerId, userId, details) {
+  async checkOut(workerId, userId, details = {}) {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
 
+    let workerObj = null;
+    if (workerId && mongoose.isValidObjectId(workerId)) {
+      workerObj = await Worker.findById(workerId);
+    }
+    if (!workerObj && userId && mongoose.isValidObjectId(userId)) {
+      workerObj = await Worker.findOne({ user: userId });
+    }
+    if (workerObj) {
+      workerId = workerObj._id;
+    }
+
+    const checkOutConditions = [];
+    if (workerId && mongoose.isValidObjectId(workerId)) checkOutConditions.push({ worker: workerId });
+    if (userId && mongoose.isValidObjectId(userId)) checkOutConditions.push({ user: userId });
+
     const record = await Attendance.findOne({
-      worker: workerId,
+      ...(checkOutConditions.length > 1 ? { $or: checkOutConditions } : (checkOutConditions[0] || {})),
       date: { $gte: todayStart, $lte: todayEnd }
     });
 
@@ -317,9 +374,7 @@ class AttendanceService {
     }
 
     if (record.checkOut) {
-      const error = new Error('You have already checked out today.');
-      error.statusCode = 400;
-      throw error;
+      return await Attendance.findById(record._id).populate('worker');
     }
 
     const now = new Date();
@@ -384,14 +439,22 @@ class AttendanceService {
     return await Attendance.findById(record._id).populate('worker');
   }
 
-  async getTodayAttendance(workerId) {
+  async getTodayAttendance(workerId, userId) {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
 
+    const conditions = [];
+    if (workerId && mongoose.isValidObjectId(workerId)) conditions.push({ worker: workerId });
+    if (userId && mongoose.isValidObjectId(userId)) conditions.push({ user: userId });
+
+    if (conditions.length === 0) {
+      return null;
+    }
+
     return await Attendance.findOne({
-      worker: workerId,
+      ...(conditions.length > 1 ? { $or: conditions } : (conditions[0] || {})),
       date: { $gte: todayStart, $lte: todayEnd }
     }).populate('worker');
   }

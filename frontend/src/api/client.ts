@@ -670,6 +670,9 @@ export const api = {
         }
         return res.data;
       } catch (err: any) {
+        if (err.response?.status === 403) {
+          return { data: [], pagination: { page: 1, limit: params?.limit || 20, total: 0, pages: 0 } };
+        }
         if (err.response) {
           throw err;
         }

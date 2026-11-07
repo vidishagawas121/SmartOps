@@ -4,6 +4,7 @@ const Attendance = require('../models/Attendance');
 const Overtime = require('../models/Overtime');
 const SalaryHistory = require('../models/SalaryHistory');
 const Notification = require('../models/Notification');
+const mongoose = require('mongoose');
 
 function parseMonth(monthStr) {
   let year, monthIndex;
@@ -42,17 +43,28 @@ class SalaryService {
     return await Salary.find(query).populate('worker').sort({ createdAt: -1 });
   }
 
-  async getMySalaries(workerId, queryParams) {
+  async getMySalaries(workerId, queryParams, userId) {
     const { month } = queryParams || {};
-    let query = { worker: workerId };
+
+    let validWorkerId = workerId;
+    if ((!validWorkerId || !mongoose.isValidObjectId(validWorkerId)) && userId && mongoose.isValidObjectId(userId)) {
+      const foundWorker = await Worker.findOne({ user: userId });
+      if (foundWorker) validWorkerId = foundWorker._id;
+    }
+
+    if (!validWorkerId || !mongoose.isValidObjectId(validWorkerId)) {
+      return [];
+    }
+
+    let query = { worker: validWorkerId };
     if (month) query.month = month;
 
     // Recalculate current month's salary automatically to ensure fresh state
     try {
       const targetMonth = month || `${new Date().toLocaleString('en-US', { month: 'long' })} ${new Date().getFullYear()}`;
-      await this.recalculateAndSaveSalary(workerId, targetMonth, 'Auto_Worker_View');
+      await this.recalculateAndSaveSalary(validWorkerId, targetMonth, 'Auto_Worker_View');
     } catch (e) {
-      console.error('Failed to auto-recalculate on getMySalaries', e);
+      console.warn('Failed to auto-recalculate on getMySalaries:', e.message);
     }
 
     return await Salary.find(query).populate('worker').sort({ createdAt: -1 });
@@ -90,12 +102,19 @@ class SalaryService {
       throw error;
     }
 
-    const worker = await Worker.findById(workerId);
+    let worker = null;
+    if (mongoose.isValidObjectId(workerId)) {
+      worker = await Worker.findById(workerId);
+    }
+    if (!worker && mongoose.isValidObjectId(workerId)) {
+      worker = await Worker.findOne({ user: workerId });
+    }
     if (!worker) {
       const error = new Error('Worker not found');
       error.statusCode = 404;
       throw error;
     }
+    workerId = worker._id;
 
     const { start, end, totalDays, formattedMonth } = parseMonth(monthStr);
 
@@ -219,6 +238,9 @@ class SalaryService {
   }
 
   async recalculateAndSaveSalary(workerId, monthStr, updatedBy = 'System') {
+    if (!workerId || !mongoose.isValidObjectId(workerId)) {
+      return null;
+    }
     const calc = await this.calculateSalary(workerId, monthStr);
     const { formattedMonth } = parseMonth(monthStr);
 

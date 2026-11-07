@@ -1,8 +1,11 @@
 const express = require('express');
 const attendanceController = require('../controllers/attendanceController');
 const workerController = require('../controllers/workerController');
+const authMiddleware = require('../middleware/auth');
 
 const attendanceRouter = express.Router();
+attendanceRouter.use(authMiddleware);
+
 attendanceRouter.get('/my-attendance', attendanceController.getMyAttendance);
 attendanceRouter.post('/checkin', attendanceController.checkIn);
 attendanceRouter.post('/checkout', attendanceController.checkOut);

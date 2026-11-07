@@ -9,6 +9,7 @@ import { getNextSequenceValue } from '../models/Counter';
 import { sendMobileOTP } from '../utils/otpService';
 import { emitDriverOnline, emitDriverOffline } from '../sockets/telemetrySocket';
 import { seedCompanyData } from '../services/seedService';
+import { verifyGoogleToken } from '../utils/googleAuth';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'smartops_jwt_unified_secret_key_2026!';
 
@@ -209,23 +210,163 @@ export const verifyOTP = async (req: Request, res: Response) => {
 };
 
 /**
- * TEMPORARILY DISABLED: Controller for Google OAuth Signup / Authentication
+ * Controller for Google OAuth Signup / Authentication
  */
-export const googleAuth = async (_req: Request, res: Response) => {
-  return res.status(400).json({
-    success: false,
-    message: 'Google authentication is temporarily disabled.'
-  });
+export const googleAuth = async (req: Request, res: Response) => {
+  try {
+    const token = req.body.token || req.body.idToken || req.body.credential || req.body.googleToken;
+    const requestedRole = req.body.role || 'Owner';
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Google credential token is required.'
+      });
+    }
+
+    const payload = await verifyGoogleToken(token);
+    const email = payload.email.toLowerCase().trim();
+
+    // Check if user already exists by googleId or email
+    let user = await User.findOne({
+      $or: [
+        { googleId: payload.googleId },
+        { email }
+      ]
+    });
+
+    if (user) {
+      if (!user.googleId) {
+        user.googleId = payload.googleId;
+      }
+      user.isEmailVerified = true;
+      user.provider = 'google';
+      if (payload.picture && !user.avatarUrl) {
+        user.avatarUrl = payload.picture;
+      }
+      if (!user.fullName && payload.fullName) {
+        user.fullName = payload.fullName;
+      }
+      await user.save();
+    } else {
+      let targetRole: 'Owner' | 'Supervisor' | 'Driver' | 'Worker' = 'Owner';
+      const r = String(requestedRole).trim().toLowerCase();
+      if (r === 'driver') targetRole = 'Driver';
+      else if (r === 'supervisor') targetRole = 'Supervisor';
+      else if (r === 'worker') targetRole = 'Worker';
+
+      let company = await Company.findOne();
+      let companyId = company?.companyId;
+      let companyName = company?.companyName;
+
+      if (!companyId) {
+        companyId = await generateCompanyId();
+        companyName = targetRole === 'Owner' && req.body.companyName
+          ? String(req.body.companyName).trim()
+          : `${payload.fullName}'s Logistics`;
+        company = await Company.create({
+          companyId,
+          companyName,
+          companyType: 'Logistics',
+          createdBy: 'google-oauth'
+        });
+      }
+
+      let generatedDriverId: string | undefined = undefined;
+      if (targetRole === 'Driver') {
+        const seq = await getNextSequenceValue('driver_unique_id');
+        generatedDriverId = `DRV-${String(seq).padStart(6, '0')}`;
+      }
+
+      user = new User({
+        fullName: payload.fullName || 'Google User',
+        email,
+        googleId: payload.googleId,
+        provider: 'google',
+        role: targetRole,
+        isEmailVerified: true,
+        verifiedAt: new Date(),
+        companyId,
+        companyName,
+        driverId: targetRole === 'Driver' ? generatedDriverId : undefined,
+        avatarUrl: payload.picture,
+        status: 'Active',
+        isAvailable: true
+      });
+
+      await user.save();
+
+      if (targetRole === 'Owner' && company && company.createdBy === 'google-oauth') {
+        await Company.updateOne({ companyId: company.companyId }, { createdBy: String(user._id) });
+      }
+
+      if (targetRole === 'Worker' || targetRole === 'Supervisor') {
+        try {
+          const WorkerModel = require('../factory/models/Worker');
+          const newWorker = await WorkerModel.create({
+            name: user.fullName,
+            email: user.email,
+            employeeId: user.employeeId || `EMP-${Date.now().toString().slice(-4)}`,
+            department: targetRole === 'Supervisor' ? 'Management' : 'Operations',
+            designation: targetRole === 'Supervisor' ? 'Floor Supervisor' : 'Floor Operator',
+            role: targetRole,
+            salary: targetRole === 'Supervisor' ? 45000 : 25000,
+            status: 'Active',
+            user: user._id
+          });
+          user.worker = newWorker._id;
+          await user.save();
+        } catch (workerErr) {
+          console.warn('[GOOGLE AUTH WORKER LINK WARNING]', workerErr);
+        }
+      }
+    }
+
+    const tokenPayload = {
+      id: String(user._id),
+      email: user.email,
+      role: user.role,
+      companyId: user.companyId || null,
+      workerId: user.worker ? String(user.worker) : (['Worker', 'Supervisor'].includes(user.role) ? String(user._id) : undefined)
+    };
+
+    const jwtToken = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '7d' });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Google authentication successful',
+      token: jwtToken,
+      user: {
+        id: user._id,
+        _id: user._id,
+        fullName: user.fullName,
+        name: user.fullName,
+        email: user.email,
+        mobileNumber: user.mobileNumber,
+        role: user.role,
+        companyId: user.companyId,
+        companyName: user.companyName,
+        isEmailVerified: user.isEmailVerified,
+        driverId: user.driverId,
+        vehicleNumber: user.vehicleNumber,
+        avatarUrl: user.avatarUrl || null,
+        worker: user.worker
+      }
+    });
+  } catch (err: any) {
+    console.error('[GOOGLE AUTH ERROR]', err);
+    return res.status(400).json({
+      success: false,
+      message: err.message || 'Google authentication failed.'
+    });
+  }
 };
 
 export const register = async (req: Request, res: Response) => {
   try {
     const googleToken = req.body.idToken || req.body.googleToken || req.body.credential;
     if (googleToken) {
-      return res.status(400).json({
-        success: false,
-        message: 'Google authentication is temporarily disabled.'
-      });
+      return googleAuth(req, res);
     }
 
     const {
@@ -397,7 +538,13 @@ export const register = async (req: Request, res: Response) => {
 
 
     const token = jwt.sign(
-      { id: newUser._id, role: newUser.role, companyId: newCompanyId || null },
+      {
+        id: String(newUser._id),
+        email: newUser.email,
+        role: newUser.role,
+        companyId: newCompanyId || null,
+        workerId: newUser.worker ? String(newUser.worker) : (['Worker', 'Supervisor'].includes(newUser.role) ? String(newUser._id) : undefined)
+      },
       JWT_SECRET,
       { expiresIn: '12h' }
     );
@@ -448,10 +595,7 @@ export const login = async (req: Request, res: Response) => {
   try {
     const googleToken = req.body.idToken || req.body.googleToken || req.body.credential;
     if (googleToken) {
-      return res.status(400).json({
-        success: false,
-        message: 'Google authentication is temporarily disabled.'
-      });
+      return googleAuth(req, res);
     }
 
     const { email, identifier, username, password, role } = req.body; const loginId = email || identifier || username; if (!loginId || !password) {
@@ -483,12 +627,14 @@ export const login = async (req: Request, res: Response) => {
       return res.status(403).json({ message: 'Account verification pending or account disabled.' });
     }
 
-    // Role verification: Log transition if user logged in through a different portal tab, but authenticate gracefully
+    // Role verification: Ensure user is logging in through the correct portal tab
     if (role && String(role).trim() !== '') {
       const requestedRole = String(role).trim().toLowerCase();
       const userRole = String(user.role).trim().toLowerCase();
       if (userRole !== requestedRole) {
-        console.log(`[AUTH NOTICE] User ${user.email} (${user.role}) logged in via ${role} portal. Auto-routing to ${user.role} dashboard.`);
+        return res.status(403).json({
+          message: `Access denied. This account is registered as ${user.role === 'Owner' ? 'an' : 'a'} ${user.role}. Please select the ${user.role} portal to sign in.`
+        });
       }
     }
 

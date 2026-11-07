@@ -1,14 +1,4 @@
-/*
- * TEMPORARILY DISABLED: Google OAuth Authentication Module
- * To re-enable:
- * 1. Uncomment import { OAuth2Client } from 'google-auth-library';
- * 2. Restore client initialization and token verification logic below.
- */
-
-// import { OAuth2Client } from 'google-auth-library';
-
-// const googleClientId = process.env.GOOGLE_CLIENT_ID || '';
-// const client = new OAuth2Client(googleClientId);
+import { OAuth2Client } from 'google-auth-library';
 
 export interface GoogleTokenPayload {
   googleId: string;
@@ -19,19 +9,20 @@ export interface GoogleTokenPayload {
 }
 
 /**
- * TEMPORARILY DISABLED: Verifies a Google OAuth token using official google-auth-library.
+ * Verifies a Google OAuth token using official google-auth-library (ID Token)
+ * or Google UserInfo endpoint (OAuth2 Access Token).
  */
-export const verifyGoogleToken = async (_token: string): Promise<GoogleTokenPayload> => {
-  /*
-  // TEMPORARILY DISABLED GOOGLE OAUTH IMPLEMENTATION
-  if (!_token) {
+export const verifyGoogleToken = async (token: string): Promise<GoogleTokenPayload> => {
+  if (!token) {
     throw new Error('Google OAuth token is required.');
   }
 
+  const clientId = process.env.GOOGLE_CLIENT_ID || '';
+  const client = new OAuth2Client(clientId);
+
   try {
-    const clientId = process.env.GOOGLE_CLIENT_ID || '';
     const ticket = await client.verifyIdToken({
-      idToken: _token,
+      idToken: token,
       audience: clientId || undefined,
     });
 
@@ -57,9 +48,10 @@ export const verifyGoogleToken = async (_token: string): Promise<GoogleTokenPayl
       picture: payload.picture
     };
   } catch (idTokenError: any) {
+    // Fallback: If not a valid JWT ID Token, test if it is a valid OAuth2 Access Token
     try {
       const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: { Authorization: `Bearer ${_token}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       if (!response.ok) {
@@ -82,6 +74,4 @@ export const verifyGoogleToken = async (_token: string): Promise<GoogleTokenPayl
       throw new Error(`Google token verification failed: ${idTokenError?.message || accessTokenError?.message || 'Invalid OAuth token'}`);
     }
   }
-  */
-  throw new Error('Google authentication is temporarily disabled.');
 };

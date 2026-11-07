@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { UserRole } from '../../types';
 import { Loader2, AlertTriangle, ExternalLink, X } from 'lucide-react';
+import { useOperations } from '../../store/OperationsContext';
 
 interface GoogleAuthButtonProps {
   role: UserRole;
@@ -24,6 +25,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
   const [loading, setLoading] = useState(false);
   const [sdkReady, setSdkReady] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
+  const { googleAuth } = useOperations();
 
   const rawClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
   const isConfigured = Boolean(rawClientId && !rawClientId.includes('your_google_client_id'));
@@ -31,7 +33,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
   useEffect(() => {
     if (!isConfigured) return;
 
-    if (window.google?.accounts?.id) {
+    if (window.google?.accounts?.id || window.google?.accounts?.oauth2) {
       setSdkReady(true);
       return;
     }
@@ -55,17 +57,85 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
     document.head.appendChild(script);
   }, [isConfigured]);
 
+  useEffect(() => {
+    if (!sdkReady || !window.google?.accounts?.id || !isConfigured) return;
+
+    try {
+      window.google.accounts.id.initialize({
+        client_id: rawClientId,
+        callback: async (response: any) => {
+          if (response?.credential) {
+            try {
+              setLoading(true);
+              const res = await googleAuth(response.credential, role);
+              onSuccess(res);
+            } catch (err: any) {
+              onError(err.message || 'Google sign-in failed.');
+            } finally {
+              setLoading(false);
+            }
+          }
+        },
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
+    } catch (e) {
+      console.warn('Google One Tap init notice:', e);
+    }
+  }, [sdkReady, isConfigured, role, googleAuth, onSuccess, onError, rawClientId]);
+
   const handleGoogleSignIn = () => {
-    onError('Google authentication is temporarily disabled.');
-    /*
-    // TEMPORARILY DISABLED GOOGLE OAUTH INITIALIZATION
     if (loading) return;
+
     if (!isConfigured) {
       setShowConfigModal(true);
       return;
     }
-    ...
-    */
+
+    if (!window.google?.accounts?.oauth2 && !window.google?.accounts?.id) {
+      onError('Google Identity Services SDK is still loading. Please try again in a moment.');
+      return;
+    }
+
+    if (window.google?.accounts?.oauth2) {
+      try {
+        const tokenClient = window.google.accounts.oauth2.initTokenClient({
+          client_id: rawClientId,
+          scope: 'email profile openid',
+          callback: async (tokenResponse: any) => {
+            if (tokenResponse.error) {
+              if (tokenResponse.error !== 'popup_closed_by_user') {
+                onError(tokenResponse.error_description || tokenResponse.error || 'Google sign-in was cancelled.');
+              }
+              return;
+            }
+            if (tokenResponse.access_token) {
+              try {
+                setLoading(true);
+                const res = await googleAuth(tokenResponse.access_token, role);
+                onSuccess(res);
+              } catch (err: any) {
+                onError(err.message || 'Google authentication failed.');
+              } finally {
+                setLoading(false);
+              }
+            }
+          }
+        });
+        tokenClient.requestAccessToken();
+        return;
+      } catch (err: any) {
+        console.warn('[Google OAuth2 initTokenClient fallback]', err);
+      }
+    }
+
+    if (window.google?.accounts?.id) {
+      window.google.accounts.id.prompt((notification: any) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          onError('Google Sign-In prompt could not be displayed. Please check your browser popup settings.');
+        }
+      });
+    }
   };
 
   return (

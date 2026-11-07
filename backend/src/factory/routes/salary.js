@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const salaryController = require('../controllers/salaryController');
+const authMiddleware = require('../middleware/auth');
+
+router.use(authMiddleware);
 
 router.get('/my-salary', salaryController.getMySalaries);
 router.get('/calculate', salaryController.calculateSalary);
